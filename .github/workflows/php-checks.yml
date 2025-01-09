@@ -13,7 +13,8 @@ on:
       - '.github/workflows/php-checks.yml'
 
 jobs:
-  quality:
+  php-quality:
+    name: PHP Quality Checks
     runs-on: ubuntu-latest
     defaults:
       run:
