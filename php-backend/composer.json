@@ -24,5 +24,8 @@
     "phpstan": "phpstan analyse",
     "phpcs": "phpcs",
     "phpcbf": "phpcbf"
-  }
+  },
+  "bin": [
+    "bin/migrate"
+  ]
 }
