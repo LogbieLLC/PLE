@@ -6,8 +6,6 @@ namespace PLEPHP\Migration;
 
 use function PLEPHP\migrateData;
 
-require_once __DIR__ . '/bootstrap.php';
-
 /**
  * Main migration script entry point
  */
@@ -26,5 +24,6 @@ function main(array $argv): void
 
 // Only execute if running as a script
 if (php_sapi_name() === 'cli') {
+    require_once __DIR__ . '/bootstrap.php';
     main($argv);
 }

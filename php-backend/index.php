@@ -7,8 +7,6 @@ namespace PLEPHP\Web;
 use RedBeanPHP\R;
 use function PLEPHP\requireAuth;
 
-require_once __DIR__ . '/bootstrap.php';
-
 /**
  * Handle the main routing logic for the application
  */
@@ -237,5 +235,6 @@ function handleRoute(): void
 
 // Only execute if running as a script
 if (php_sapi_name() !== 'cli') {
+    require_once __DIR__ . '/bootstrap.php';
     handleRoute();
 }
