@@ -1,4 +1,19 @@
 <?php
+/**
+ * Database Configuration Module
+ *
+ * This file handles database setup, RedBeanPHP initialization,
+ * and initial user creation for the PLE system.
+ *
+ * PHP version 7.4
+ *
+ * @category  Configuration
+ * @package   PLEPHP
+ * @author    Devin AI <devin@logbie.com>
+ * @copyright 2024 Logbie LLC
+ * @license   https://opensource.org/licenses/MIT MIT License
+ * @link      https://github.com/LogbieLLC/PLE
+ */
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);

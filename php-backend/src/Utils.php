@@ -1,5 +1,21 @@
 <?php
 
+/**
+ * Utility Functions Module
+ *
+ * This file contains utility functions for the PLE system, including
+ * ID normalization and data migration functionality.
+ *
+ * PHP version 7.4
+ *
+ * @category  Utilities
+ * @package   PLEPHP
+ * @author    Devin AI <devin@logbie.com>
+ * @copyright 2024 Logbie LLC
+ * @license   https://opensource.org/licenses/MIT MIT License
+ * @link      https://github.com/LogbieLLC/PLE
+ */
+
 declare(strict_types=1);
 
 namespace PLEPHP;
@@ -78,7 +94,11 @@ function migrateData(string $jsonFile): void
                 $checklist->comments = $check['comments'] ?? '';
 
                 R::store($checklist);
-                echo "Migrated checklist: {$check['pleId']} on {$check['dateInspected']}\n";
+                $msg = sprintf("Migrated checklist: %s on %s\n", 
+                    $check['pleId'], 
+                    $check['dateInspected']
+                );
+                echo $msg;
             }
         }
 

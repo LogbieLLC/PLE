@@ -1,4 +1,19 @@
 <?php
+/**
+ * Application Bootstrap Module
+ *
+ * This file initializes the PLE system, including database connections,
+ * model registration, template engine setup, and session management.
+ *
+ * PHP version 7.4
+ *
+ * @category  Bootstrap
+ * @package   PLEPHP
+ * @author    Devin AI <devin@logbie.com>
+ * @copyright 2024 Logbie LLC
+ * @license   https://opensource.org/licenses/MIT MIT License
+ * @link      https://github.com/LogbieLLC/PLE
+ */
 
 declare(strict_types=1);
 
