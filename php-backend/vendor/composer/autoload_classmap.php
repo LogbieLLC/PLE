@@ -8,6 +8,8 @@ $baseDir = dirname($vendorDir);
 return array(
     'CURLStringFile' => $vendorDir . '/symfony/polyfill-php81/Resources/stubs/CURLStringFile.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
+    'PLEPHP\\Model\\Checklist' => $baseDir . '/src/Model/Checklist.php',
+    'PLEPHP\\Model\\Equipment' => $baseDir . '/src/Model/Equipment.php',
     'RedBeanPHP\\Adapter' => $vendorDir . '/gabordemooij/redbean/RedBeanPHP/Adapter.php',
     'RedBeanPHP\\Adapter\\DBAdapter' => $vendorDir . '/gabordemooij/redbean/RedBeanPHP/Adapter/DBAdapter.php',
     'RedBeanPHP\\AssociationManager' => $vendorDir . '/gabordemooij/redbean/RedBeanPHP/AssociationManager.php',

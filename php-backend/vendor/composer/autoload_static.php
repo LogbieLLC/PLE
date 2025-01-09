@@ -69,6 +69,8 @@ class ComposerStaticInit8373e2416a91b03a471103b0ecee155c
     public static $classMap = array (
         'CURLStringFile' => __DIR__ . '/..' . '/symfony/polyfill-php81/Resources/stubs/CURLStringFile.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'PLEPHP\\Model\\Checklist' => __DIR__ . '/../..' . '/src/Model/Checklist.php',
+        'PLEPHP\\Model\\Equipment' => __DIR__ . '/../..' . '/src/Model/Equipment.php',
         'RedBeanPHP\\Adapter' => __DIR__ . '/..' . '/gabordemooij/redbean/RedBeanPHP/Adapter.php',
         'RedBeanPHP\\Adapter\\DBAdapter' => __DIR__ . '/..' . '/gabordemooij/redbean/RedBeanPHP/Adapter/DBAdapter.php',
         'RedBeanPHP\\AssociationManager' => __DIR__ . '/..' . '/gabordemooij/redbean/RedBeanPHP/AssociationManager.php',
