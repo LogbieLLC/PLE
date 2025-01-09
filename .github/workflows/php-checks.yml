@@ -1,0 +1,73 @@
+name: PHP Code Quality Checks
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'php-backend/**'
+      - '.github/workflows/php-checks.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'php-backend/**'
+      - '.github/workflows/php-checks.yml'
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: php-backend
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, intl, sqlite3
+          coverage: none
+          tools: composer:v2
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: |
+          composer install --prefer-dist --no-progress
+          composer require --dev squizlabs/php_codesniffer phpstan/phpstan
+
+      - name: Run PHPCS Manual Check
+        run: vendor/bin/phpcs --standard=PSR12 --report=full --colors --ignore=*/vendor/* php-backend/
+
+      - name: Run PHPCS Auto-Fix
+        if: github.event_name == 'pull_request'
+        run: |
+          vendor/bin/phpcbf --standard=PSR12 --ignore=*/vendor/* php-backend/ || true
+          git config --global user.email "devin@logbie.com"
+          git config --global user.name "Devin AI"
+          if [[ -n $(git status --porcelain) ]]; then
+            git add .
+            git commit -m "style: auto-fix code style issues"
+            git push
+          fi
+
+      - name: Run PHPStan
+        run: |
+          echo "parameters:
+            level: 5
+            paths:
+              - php-backend
+            excludePaths:
+              - php-backend/vendor
+            checkMissingIterableValueType: false" > phpstan.neon
+          vendor/bin/phpstan analyse --no-progress
