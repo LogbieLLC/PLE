@@ -10,6 +10,9 @@ parameters:
         - '#Call to an undefined method RedBeanPHP\\OODBBean::#'
         - '#Access to an undefined property RedBeanPHP\\OODBBean::#'
         - '#Parameter \#1 \$bean of method .+ expects RedBeanPHP\\OODBBean, RedBeanPHP\\OODBBean\|null given#'
+        - '#Class .+ implements unknown interface RedBeanPHP\\Model#'
+    scanDirectories:
+        - vendor/gabordemooij/redbean/RedBeanPHP
     universalObjectCratesClasses:
         - RedBeanPHP\OODBBean
         - PLEPHP\Model\Equipment
