@@ -74,6 +74,5 @@ jobs:
               - .
             excludePaths:
               - vendor
-              - cache
-            checkMissingIterableValueType: false" > phpstan.neon
+              - cache" > phpstan.neon
           vendor/bin/phpstan analyse --no-progress
