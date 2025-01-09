@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/bootstrap.php';
-
 namespace PLEPHP\Migration;
 
 use function PLEPHP\migrateData;
+
+require_once __DIR__ . '/bootstrap.php';
 
 /**
  * Main migration script entry point
