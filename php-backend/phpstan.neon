@@ -5,3 +5,6 @@ parameters:
     excludePaths:
         - vendor
         - cache
+    checkMissingIterableValueType: false
+    universalObjectCratesClasses:
+        - RedBeanPHP\OODBBean
