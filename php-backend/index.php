@@ -5,24 +5,9 @@ declare(strict_types=1);
 namespace PLEPHP\Web;
 
 use RedBeanPHP\R;
-
 use function PLEPHP\requireAuth;
 
 require_once __DIR__ . '/bootstrap.php';
-
-// Initialize users table if needed
-if (!R::testConnection()) {
-    die('Database connection failed');
-}
-
-if (!R::count('user')) {
-    // Create default admin user
-    $admin = R::dispense('user');
-    $admin->username = 'admin';
-    $admin->password = password_hash('admin', PASSWORD_DEFAULT); // Change in production
-    $admin->role = 'admin';
-    R::store($admin);
-}
 
 // Basic routing
 $action = $_GET['action'] ?? 'home';

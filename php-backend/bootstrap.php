@@ -16,6 +16,20 @@ require_once __DIR__ . '/config.php';
 
 session_start();
 
+// Initialize users table if needed
+if (!\RedBeanPHP\R::testConnection()) {
+    die('Database connection failed');
+}
+
+if (!\RedBeanPHP\R::count('user')) {
+    // Create default admin user
+    $admin = \RedBeanPHP\R::dispense('user');
+    $admin->username = 'admin';
+    $admin->password = password_hash('admin', PASSWORD_DEFAULT); // Change in production
+    $admin->role = 'admin';
+    \RedBeanPHP\R::store($admin);
+}
+
 // Setup Twig
 $loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/templates');
 $GLOBALS['twig'] = new \Twig\Environment($loader, [

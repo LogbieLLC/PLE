@@ -1,10 +1,10 @@
 parameters:
-    level: 5
-    paths:
-        - .
-    excludePaths:
-        - vendor
-        - cache
-    checkMissingIterableValueType: false
-    universalObjectCratesClasses:
-        - RedBeanPHP\OODBBean
+  level: 5
+  paths:
+    - .
+  excludePaths:
+    - vendor
+    - cache
+  checkMissingIterableValueType: false
+  universalObjectCratesClasses:
+    - RedBeanPHP\OODBBean
