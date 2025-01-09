@@ -153,15 +153,20 @@ try {
                 }
 
                 // Check for concurrent inspections
-                $activeInspection = R::findOne('inspection_lock', 
+                $activeInspection = R::findOne(
+                    'inspection_lock',
                     ' ple_id = ? AND inspector_id = ? AND created > ? ',
-                    [$_POST['pleId'], $_SESSION['user']['id'], date('Y-m-d H:i:s', strtotime('-30 minutes'))]
+                    [
+                        $_POST['pleId'],
+                        $_SESSION['user']['id'],
+                        date('Y-m-d H:i:s', strtotime('-30 minutes'))
+                    ]
                 );
-                
+
                 if ($activeInspection) {
                     throw new \Exception("This equipment is currently being inspected by another user");
                 }
-                
+
                 // Create inspection lock
                 $lock = R::dispense('inspection_lock');
                 $lock->ple_id = $_POST['pleId'];
