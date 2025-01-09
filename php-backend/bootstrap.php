@@ -18,10 +18,10 @@ session_start();
 
 // Setup Twig
 $loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/templates');
-$twig = new \Twig\Environment($loader, [
+$GLOBALS['twig'] = new \Twig\Environment($loader, [
     'cache' => __DIR__ . '/cache',
     'debug' => !getenv('APP_ENV') || getenv('APP_ENV') !== 'production'
 ]);
 
 // Add global user data to Twig
-$twig->addGlobal('user', $_SESSION['user'] ?? null);
+$GLOBALS['twig']->addGlobal('user', $_SESSION['user'] ?? null);

@@ -34,7 +34,7 @@ try {
             requireAuth();
             // Show equipment list
             $equipment = R::findAll('equipment', ' ORDER BY ple_id');
-            echo $twig->render('home.twig', ['equipment' => $equipment]);
+            echo $GLOBALS['twig']->render('home.twig', ['equipment' => $equipment]);
             break;
 
         case 'addEquipment':
@@ -73,7 +73,7 @@ try {
                 exit;
             }
 
-            echo $twig->render('add_equipment.twig');
+            echo $GLOBALS['twig']->render('add_equipment.twig');
             break;
 
         case 'editEquipment':
@@ -99,7 +99,7 @@ try {
                 exit;
             }
 
-            echo $twig->render('edit_equipment.twig', ['equipment' => $equipment]);
+            echo $GLOBALS['twig']->render('edit_equipment.twig', ['equipment' => $equipment]);
             break;
 
         case 'deleteEquipment':
@@ -124,7 +124,7 @@ try {
             requireAuth();
             // Get all equipment for inspection selection
             $equipment = R::findAll('equipment', ' ORDER BY ple_id');
-            echo $twig->render('inspections.twig', ['equipment' => $equipment]);
+            echo $GLOBALS['twig']->render('inspections.twig', ['equipment' => $equipment]);
             break;
 
         case 'addInspection':
@@ -201,7 +201,7 @@ try {
             }
 
             $equipment = R::findAll('equipment', ' ORDER BY ple_id');
-            echo $twig->render('add_inspection.twig', ['equipment' => $equipment]);
+            echo $GLOBALS['twig']->render('add_inspection.twig', ['equipment' => $equipment]);
             break;
 
         case 'login':
@@ -222,11 +222,11 @@ try {
                 }
 
                 $error = "Invalid username or password";
-                echo $twig->render('login.twig', ['error' => $error]);
+                echo $GLOBALS['twig']->render('login.twig', ['error' => $error]);
                 break;
             }
 
-            echo $twig->render('login.twig');
+            echo $GLOBALS['twig']->render('login.twig');
             break;
 
         case 'logout':
@@ -236,11 +236,11 @@ try {
 
         default:
             http_response_code(404);
-            echo $twig->render('404.twig');
+            echo $GLOBALS['twig']->render('404.twig');
             break;
     }
 } catch (\Exception $e) {
     error_log($e->getMessage());
     http_response_code(500);
-    echo $twig->render('error.twig', ['message' => $e->getMessage()]);
+    echo $GLOBALS['twig']->render('error.twig', ['message' => $e->getMessage()]);
 }

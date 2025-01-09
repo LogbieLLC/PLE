@@ -15,6 +15,9 @@ namespace PLEPHP\Model;
  * @property string $department
  * @property string $status
  * @property string $last_work_order
+ * @property string $pleId
+ * @property string $pleIdNormalized
+ * @property string $serialNumber
  */
 class Equipment extends \RedBeanPHP\OODBBean
 {

@@ -18,6 +18,14 @@ namespace PLEPHP\Model;
  * @property bool $tagged_out_of_service
  * @property string $work_order_number
  * @property string $comments
+ * @property string $pleId
+ * @property string $dateInspected
+ * @property string $timeInspected
+ * @property string $inspectorInitials
+ * @property bool $safetyDevices
+ * @property bool $repairRequired
+ * @property bool $taggedOutOfService
+ * @property string $workOrderNumber
  */
 class Checklist extends \RedBeanPHP\OODBBean
 {
