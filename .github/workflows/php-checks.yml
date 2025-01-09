@@ -53,9 +53,10 @@ jobs:
           git config --global user.email "devin@logbie.com"
           git config --global user.name "Devin AI"
           if [[ -n $(git status --porcelain) ]]; then
+            git checkout $GITHUB_HEAD_REF
             git add .
             git commit -m "style: auto-fix code style issues"
-            git push
+            git push origin $GITHUB_HEAD_REF
           fi
 
       - name: Run PHPCS Manual Check
