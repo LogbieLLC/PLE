@@ -2,14 +2,16 @@
 
 declare(strict_types=1);
 
+namespace PLEPHP\Migration;
+
 use function PLEPHP\migrateData;
 
-// Usage
+require_once __DIR__ . '/bootstrap.php';
+
+// Validate command line arguments
 if ($argc !== 2) {
     die("Usage: php migrate.php <path_to_json_file>\n");
 }
-
-require_once __DIR__ . '/bootstrap.php';
 
 try {
     migrateData($argv[1]);
