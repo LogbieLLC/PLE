@@ -21,6 +21,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -48,15 +51,22 @@ jobs:
 
       - name: Run PHPCS Auto-Fix
         if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           vendor/bin/phpcbf --standard=PSR12 --ignore=vendor/*,cache/* ./ || true
           git config --global user.email "devin@logbie.com"
           git config --global user.name "Devin AI"
           if [[ -n $(git status --porcelain) ]]; then
-            git checkout $GITHUB_HEAD_REF
+            # Configure git with token
+            git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+            # Fetch PR branch
+            git fetch origin pull/${{ github.event.pull_request.number }}/head:${{ github.head_ref }}
+            # Checkout and update branch
+            git checkout ${{ github.head_ref }}
             git add .
             git commit -m "style: auto-fix code style issues"
-            git push origin $GITHUB_HEAD_REF
+            git push origin HEAD:${{ github.head_ref }}
           fi
 
       - name: Run PHPCS Manual Check
