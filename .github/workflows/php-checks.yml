@@ -47,12 +47,12 @@ jobs:
           composer require --dev squizlabs/php_codesniffer phpstan/phpstan
 
       - name: Run PHPCS Manual Check
-        run: vendor/bin/phpcs --standard=PSR12 --report=full --colors --ignore=*/vendor/* php-backend/
+        run: vendor/bin/phpcs --standard=PSR12 --report=full --colors --ignore=vendor/* ./
 
       - name: Run PHPCS Auto-Fix
         if: github.event_name == 'pull_request'
         run: |
-          vendor/bin/phpcbf --standard=PSR12 --ignore=*/vendor/* php-backend/ || true
+          vendor/bin/phpcbf --standard=PSR12 --ignore=vendor/* ./ || true
           git config --global user.email "devin@logbie.com"
           git config --global user.name "Devin AI"
           if [[ -n $(git status --porcelain) ]]; then
@@ -66,8 +66,8 @@ jobs:
           echo "parameters:
             level: 5
             paths:
-              - php-backend
+              - .
             excludePaths:
-              - php-backend/vendor
+              - vendor
             checkMissingIterableValueType: false" > phpstan.neon
           vendor/bin/phpstan analyse --no-progress
