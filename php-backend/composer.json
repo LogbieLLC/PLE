@@ -1,6 +1,6 @@
 {
   "name": "logbiellc/ple-php-backend",
-  "description": "PHP-based reimplementation of PLE system",
+  "description": "PHP-based reimplementation of PLE system with SQLite",
   "type": "project",
   "require": {
     "php": ">=7.4",
