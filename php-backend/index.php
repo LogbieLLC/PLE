@@ -6,21 +6,6 @@ use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 use RedBeanPHP\R;
 
-require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/config.php';
-
-session_start();
-
-// Setup Twig
-$loader = new FilesystemLoader(__DIR__ . '/templates');
-$twig = new Environment($loader, [
-    'cache' => __DIR__ . '/cache',
-    'debug' => !getenv('APP_ENV') || getenv('APP_ENV') !== 'production'
-]);
-
-// Add global user data to Twig
-$twig->addGlobal('user', $_SESSION['user'] ?? null);
-
 /**
  * Authentication middleware to ensure user is logged in
  *
@@ -268,3 +253,18 @@ try {
     http_response_code(500);
     echo $twig->render('error.twig', ['message' => $e->getMessage()]);
 }
+
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/config.php';
+
+session_start();
+
+// Setup Twig
+$loader = new FilesystemLoader(__DIR__ . '/templates');
+$twig = new Environment($loader, [
+    'cache' => __DIR__ . '/cache',
+    'debug' => !getenv('APP_ENV') || getenv('APP_ENV') !== 'production'
+]);
+
+// Add global user data to Twig
+$twig->addGlobal('user', $_SESSION['user'] ?? null);

@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 use RedBeanPHP\R;
 
-require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/config.php';
-
 /**
  * Normalize a PLE ID by converting to uppercase and trimming whitespace
  *
@@ -110,3 +107,6 @@ try {
 } catch (\Exception $e) {
     die("Error: " . $e->getMessage() . "\n");
 }
+
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/config.php';
