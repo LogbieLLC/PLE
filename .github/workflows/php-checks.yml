@@ -2,11 +2,12 @@ name: PHP Code Quality Checks
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, 'devin/*' ]
     paths:
       - 'php-backend/**'
       - '.github/workflows/php-checks.yml'
   pull_request:
+    branches: [ main ]
     types: [opened, synchronize, reopened]
     paths:
       - 'php-backend/**'
