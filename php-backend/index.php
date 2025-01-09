@@ -2,22 +2,10 @@
 
 declare(strict_types=1);
 
-use Twig\Environment;
-use Twig\Loader\FilesystemLoader;
 use RedBeanPHP\R;
+use function PLEPHP\requireAuth;
 
-/**
- * Authentication middleware to ensure user is logged in
- *
- * @return void
- */
-function requireAuth(): void
-{
-    if (!isset($_SESSION['user'])) {
-        header('Location: index.php?action=login');
-        exit;
-    }
-}
+require_once __DIR__ . '/bootstrap.php';
 
 // Initialize users table if needed
 if (!R::testConnection()) {
@@ -253,18 +241,3 @@ try {
     http_response_code(500);
     echo $twig->render('error.twig', ['message' => $e->getMessage()]);
 }
-
-require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/config.php';
-
-session_start();
-
-// Setup Twig
-$loader = new FilesystemLoader(__DIR__ . '/templates');
-$twig = new Environment($loader, [
-    'cache' => __DIR__ . '/cache',
-    'debug' => !getenv('APP_ENV') || getenv('APP_ENV') !== 'production'
-]);
-
-// Add global user data to Twig
-$twig->addGlobal('user', $_SESSION['user'] ?? null);

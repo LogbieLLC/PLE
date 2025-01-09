@@ -3,17 +3,9 @@
 declare(strict_types=1);
 
 use RedBeanPHP\R;
+use function PLEPHP\normalizeId;
 
-/**
- * Normalize a PLE ID by converting to uppercase and trimming whitespace
- *
- * @param string $pleId The PLE ID to normalize
- * @return string The normalized PLE ID
- */
-function normalizeId(string $pleId): string
-{
-    return strtoupper(trim($pleId));
-}
+require_once __DIR__ . '/bootstrap.php';
 
 /**
  * Migrate data from JSON export file to database
@@ -107,6 +99,3 @@ try {
 } catch (\Exception $e) {
     die("Error: " . $e->getMessage() . "\n");
 }
-
-require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/config.php';
