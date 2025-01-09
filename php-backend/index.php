@@ -123,7 +123,7 @@ try {
         case 'inspections':
             requireAuth();
             // Get all equipment for inspection selection
-            $equipment = R::findAll('equipment', ' ORDER BY pleId');
+            $equipment = R::findAll('equipment', ' ORDER BY ple_id');
             echo $twig->render('inspections.twig', ['equipment' => $equipment]);
             break;
 
@@ -200,7 +200,7 @@ try {
                 exit;
             }
 
-            $equipment = R::findAll('equipment', ' ORDER BY pleId');
+            $equipment = R::findAll('equipment', ' ORDER BY ple_id');
             echo $twig->render('add_inspection.twig', ['equipment' => $equipment]);
             break;
 

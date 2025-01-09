@@ -7,7 +7,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>Edit Equipment - {{ equipment.pleId }}</h1>
+            <h1>Edit Equipment - {{ equipment.ple_id }}</h1>
             <nav>
                 <a href="index.php" class="button">Back to List</a>
             </nav>
@@ -22,8 +22,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="pleId">PLE ID:</label>
-                    <input type="text" value="{{ equipment.pleId }}" readonly disabled>
+                    <label for="ple_id">PLE ID:</label>
+                    <input type="text" value="{{ equipment.ple_id }}" readonly disabled>
                 </div>
 
                 <div class="form-group">
@@ -37,8 +37,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="serialNumber">Serial Number:</label>
-                    <input type="text" name="serialNumber" id="serialNumber" value="{{ equipment.serialNumber }}" required>
+                    <label for="serial_number">Serial Number:</label>
+                    <input type="text" name="serial_number" id="serial_number" value="{{ equipment.serial_number }}" required>
                 </div>
 
                 <div class="form-group">
