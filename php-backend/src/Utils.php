@@ -9,7 +9,7 @@ use RedBeanPHP\R;
 /**
  * Normalize a PLE ID by converting to uppercase and trimming whitespace
  *
- * @param string $pleId The PLE ID to normalize
+ * @param  string $pleId The PLE ID to normalize
  * @return string The normalized PLE ID
  */
 function normalizeId(string $pleId): string
@@ -20,7 +20,7 @@ function normalizeId(string $pleId): string
 /**
  * Migrate data from JSON export file to database
  *
- * @param string $jsonFile Path to the JSON file containing exported data
+ * @param  string $jsonFile Path to the JSON file containing exported data
  * @throws \Exception If file not found or JSON is invalid
  * @return void
  */

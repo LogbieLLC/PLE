@@ -22,7 +22,7 @@ namespace PLEPHP\Model;
 class Equipment extends \RedBeanPHP\SimpleModel
 {
     /**
-     * @param mixed $prop
+     * @param  mixed $prop
      * @return mixed
      */
     public function __get($prop)
@@ -31,8 +31,8 @@ class Equipment extends \RedBeanPHP\SimpleModel
     }
 
     /**
-     * @param mixed $prop
-     * @param mixed $value
+     * @param  mixed $prop
+     * @param  mixed $value
      * @return void
      */
     public function __set($prop, $value): void

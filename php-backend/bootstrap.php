@@ -6,17 +6,21 @@ require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config.php';
 
 // Configure RedBean model namespace
-\RedBeanPHP\R::ext('equipment', function($bean) {
-    $model = new \PLEPHP\Model\Equipment();
-    $model->loadBean($bean);
-    return $model;
-});
+\RedBeanPHP\R::ext(
+    'equipment', function ($bean) {
+        $model = new \PLEPHP\Model\Equipment();
+        $model->loadBean($bean);
+        return $model;
+    }
+);
 
-\RedBeanPHP\R::ext('checklist', function($bean) {
-    $model = new \PLEPHP\Model\Checklist();
-    $model->loadBean($bean);
-    return $model;
-});
+\RedBeanPHP\R::ext(
+    'checklist', function ($bean) {
+        $model = new \PLEPHP\Model\Checklist();
+        $model->loadBean($bean);
+        return $model;
+    }
+);
 
 session_start();
 
@@ -36,10 +40,12 @@ if (!\RedBeanPHP\R::count('user')) {
 
 // Setup Twig
 $loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/templates');
-$GLOBALS['twig'] = new \Twig\Environment($loader, [
+$GLOBALS['twig'] = new \Twig\Environment(
+    $loader, [
     'cache' => __DIR__ . '/cache',
     'debug' => !getenv('APP_ENV') || getenv('APP_ENV') !== 'production'
-]);
+    ]
+);
 
 // Add global user data to Twig
 $GLOBALS['twig']->addGlobal('user', $_SESSION['user'] ?? null);
