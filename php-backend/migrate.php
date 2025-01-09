@@ -1,14 +1,17 @@
 <?php
+
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config.php';
 
 use RedBeanPHP\R;
 
-function normalizeId($pleId) {
+function normalizeId($pleId)
+{
     return strtoupper(trim($pleId));
 }
 
-function migrateData($jsonFile) {
+function migrateData($jsonFile)
+{
     if (!file_exists($jsonFile)) {
         throw new \Exception("JSON file not found: $jsonFile");
     }
@@ -20,7 +23,7 @@ function migrateData($jsonFile) {
 
     // Start transaction
     R::begin();
-    
+
     try {
         // Migrate equipment
         if (isset($data['equipment'])) {
@@ -33,7 +36,7 @@ function migrateData($jsonFile) {
                 $equipment->model = $eq['model'];
                 $equipment->serialNumber = $eq['serialNumber'];
                 $equipment->department = $eq['department'];
-                
+
                 R::store($equipment);
                 echo "Migrated equipment: {$eq['pleId']}\n";
             }
@@ -47,7 +50,7 @@ function migrateData($jsonFile) {
                 $checklist->dateInspected = $check['dateInspected'];
                 $checklist->timeInspected = $check['timeInspected'];
                 $checklist->inspectorInitials = $check['inspectorInitials'];
-                
+
                 // Boolean fields
                 $checklist->damage = (bool)($check['damage'] ?? false);
                 $checklist->leaks = (bool)($check['leaks'] ?? false);
@@ -55,11 +58,11 @@ function migrateData($jsonFile) {
                 $checklist->operation = (bool)($check['operation'] ?? false);
                 $checklist->repairRequired = (bool)($check['repairRequired'] ?? false);
                 $checklist->taggedOutOfService = (bool)($check['taggedOutOfService'] ?? false);
-                
+
                 // Optional fields
                 $checklist->workOrderNumber = $check['workOrderNumber'] ?? '';
                 $checklist->comments = $check['comments'] ?? '';
-                
+
                 R::store($checklist);
                 echo "Migrated checklist: {$check['pleId']} on {$check['dateInspected']}\n";
             }
@@ -68,14 +71,13 @@ function migrateData($jsonFile) {
         // Commit transaction
         R::commit();
         echo "\nMigration completed successfully!\n";
-        
+
         // Verify counts
         $equipmentCount = R::count('equipment');
         $checklistCount = R::count('checklist');
         echo "\nVerification:\n";
         echo "Equipment items: $equipmentCount\n";
         echo "Checklist entries: $checklistCount\n";
-        
     } catch (\Exception $e) {
         // Rollback on error
         R::rollback();

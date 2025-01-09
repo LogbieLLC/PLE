@@ -1,4 +1,5 @@
 <?php
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -33,12 +34,12 @@ try {
 
     // Setup RedBean with SQLite
     R::setup('sqlite:' . $dbfile);
-    
+
     // Enable debug mode in non-production
     if (!getenv('APP_ENV') || getenv('APP_ENV') !== 'production') {
         R::debug(true);
     }
-    
+
     // Initialize admin user if not exists
     if (!R::count('user')) {
         $admin = R::dispense('user');
@@ -47,10 +48,9 @@ try {
         $admin->role = 'admin';
         R::store($admin);
     }
-    
+
     // Test connection
     R::testConnection();
-    
 } catch (\Exception $e) {
     error_log('Database setup failed: ' . $e->getMessage());
     throw new \Exception('Database setup failed: ' . $e->getMessage());

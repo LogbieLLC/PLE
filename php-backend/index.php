@@ -1,4 +1,5 @@
 <?php
+
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config.php';
 
@@ -19,7 +20,8 @@ $twig = new Environment($loader, [
 $twig->addGlobal('user', $_SESSION['user'] ?? null);
 
 // Authentication middleware
-function requireAuth() {
+function requireAuth()
+{
     if (!isset($_SESSION['user'])) {
         header('Location: index.php?action=login');
         exit;
@@ -59,17 +61,17 @@ try {
                 // Validate PLE ID format based on type
                 $pleId = $_POST['pleId'] ?? '';
                 $type = $_POST['type'] ?? '';
-                
+
                 // Validate PLE ID prefix matches type
                 $prefix = substr($pleId, 0, 1);
-                $validPrefix = match($type) {
+                $validPrefix = match ($type) {
                     'Walkie-stacker' => 'R',
                     'Electric Jack' => 'E',
                     'Fork-lift' => 'F',
                     'Scissor lift' => 'S',
                     default => null
                 };
-                
+
                 if (!$validPrefix || $prefix !== $validPrefix) {
                     throw new \Exception("Invalid PLE ID prefix for equipment type");
                 }
@@ -83,12 +85,12 @@ try {
                 $equipment->model = $_POST['model'] ?? '';
                 $equipment->serial_number = $_POST['serialNumber'] ?? '';
                 $equipment->department = $_POST['department'] ?? '';
-                
+
                 R::store($equipment);
                 header('Location: index.php');
                 exit;
             }
-            
+
             echo $twig->render('add_equipment.twig');
             break;
 
@@ -109,12 +111,12 @@ try {
                 $equipment->model = $_POST['model'] ?? $equipment->model;
                 $equipment->serial_number = $_POST['serialNumber'] ?? $equipment->serial_number;
                 $equipment->department = $_POST['department'] ?? $equipment->department;
-                
+
                 R::store($equipment);
                 header('Location: index.php');
                 exit;
             }
-            
+
             echo $twig->render('edit_equipment.twig', ['equipment' => $equipment]);
             break;
 
@@ -130,7 +132,7 @@ try {
                 if ($equipment->id) {
                     R::trash($equipment);
                 }
-                
+
                 header('Location: index.php');
                 exit;
             }
@@ -177,7 +179,7 @@ try {
                 // Validate required fields
                 $pleId = $_POST['pleId'] ?? '';
                 $inspectorInitials = $_POST['inspectorInitials'] ?? '';
-                
+
                 if (!$pleId || !$inspectorInitials) {
                     throw new \Exception("PLE ID and inspector initials are required");
                 }
@@ -188,13 +190,13 @@ try {
                 $checklist->date_inspected = date('Y-m-d');
                 $checklist->time_inspected = date('H:i:s');
                 $checklist->inspector_initials = $inspectorInitials;
-                
+
                 // Inspection categories
                 $checklist->damage = isset($_POST['damage']);
                 $checklist->leaks = isset($_POST['leaks']);
                 $checklist->safety_devices = isset($_POST['safetyDevices']);
                 $checklist->operation = isset($_POST['operation']);
-                
+
                 // Additional fields
                 $checklist->repair_required = isset($_POST['repairRequired']);
                 $checklist->tagged_out_of_service = isset($_POST['taggedOutOfService']);
@@ -210,12 +212,12 @@ try {
                         R::store($equipment);
                     }
                 }
-                
+
                 R::store($checklist);
                 header('Location: index.php?action=inspections');
                 exit;
             }
-            
+
             $equipment = R::findAll('equipment', ' ORDER BY pleId');
             echo $twig->render('add_inspection.twig', ['equipment' => $equipment]);
             break;
@@ -224,9 +226,9 @@ try {
             if ($method === 'POST') {
                 $username = $_POST['username'] ?? '';
                 $password = $_POST['password'] ?? '';
-                
+
                 $user = R::findOne('user', ' username = ? ', [$username]);
-                
+
                 if ($user && password_verify($password, $user->password)) {
                     $_SESSION['user'] = [
                         'id' => $user->id,
@@ -236,20 +238,20 @@ try {
                     header('Location: index.php');
                     exit;
                 }
-                
+
                 $error = "Invalid username or password";
                 echo $twig->render('login.twig', ['error' => $error]);
                 break;
             }
-            
+
             echo $twig->render('login.twig');
             break;
-            
+
         case 'logout':
             session_destroy();
             header('Location: index.php?action=login');
             exit;
-            
+
         default:
             http_response_code(404);
             echo $twig->render('404.twig');
