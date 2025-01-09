@@ -3,7 +3,7 @@
         'name' => 'logbiellc/ple-php-backend',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '5ed05b0c128ba71a39d51ef0c72d7771f2bbf4ec',
+        'reference' => 'a7bc8b14b6b8e17505f5dea7868237087e11c1dc',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -22,7 +22,7 @@
         'logbiellc/ple-php-backend' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '5ed05b0c128ba71a39d51ef0c72d7771f2bbf4ec',
+            'reference' => 'a7bc8b14b6b8e17505f5dea7868237087e11c1dc',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
