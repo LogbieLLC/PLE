@@ -7,7 +7,7 @@ on:
       - 'php-backend/**'
       - '.github/workflows/php-checks.yml'
   pull_request:
-    branches: [ main ]
+    types: [opened, synchronize, reopened]
     paths:
       - 'php-backend/**'
       - '.github/workflows/php-checks.yml'
