@@ -6,8 +6,6 @@ namespace PLEPHP\Migration;
 
 use function PLEPHP\migrateData;
 
-require_once __DIR__ . '/bootstrap.php';
-
 /**
  * Main migration script entry point
  */
@@ -23,6 +21,8 @@ function main(array $argv): void
         die("Error: " . $e->getMessage() . "\n");
     }
 }
+
+require_once __DIR__ . '/bootstrap.php';
 
 // Run migration
 main($argv);
