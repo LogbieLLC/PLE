@@ -19,15 +19,8 @@ namespace PLEPHP\Model;
  * @property string $pleIdNormalized
  * @property string $serialNumber
  */
-class Equipment implements \RedBeanPHP\Model
+class Equipment extends \RedBeanPHP\SimpleModel
 {
-    private \RedBeanPHP\OODBBean $bean;
-
-    public function loadBean(\RedBeanPHP\OODBBean $bean)
-    {
-        $this->bean = $bean;
-    }
-
     /**
      * @param string $property
      * @return mixed
