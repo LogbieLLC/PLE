@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PLE System - Equipment List</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Powered Lifting Equipment Management</h1>
+            <nav>
+                <a href="index.php?action=addEquipment" class="button-primary">Add New Equipment</a>
+                <div class="user-info">
+                    Logged in as: {{ user.username }}
+                    <a href="index.php?action=logout" class="button">Logout</a>
+                </div>
+            </nav>
+        </header>
+
+        <main>
+            <section class="equipment-list">
+                <h2>Equipment Inventory</h2>
+                {% if equipment|length > 0 %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>PLE ID</th>
+                                <th>Type</th>
+                                <th>Make</th>
+                                <th>Model</th>
+                                <th>Serial Number</th>
+                                <th>Department</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for eq in equipment %}
+                                <tr>
+                                    <td>{{ eq.ple_id }}</td>
+                                    <td>{{ eq.type }}</td>
+                                    <td>{{ eq.make }}</td>
+                                    <td>{{ eq.model }}</td>
+                                    <td>{{ eq.serial_number }}</td>
+                                    <td>{{ eq.department }}</td>
+                                    <td>
+                                        <a href="index.php?action=editEquipment&id={{ eq.id }}" class="button">Edit</a>
+                                        <form method="POST" action="index.php?action=deleteEquipment" style="display: inline;">
+                                            <input type="hidden" name="id" value="{{ eq.id }}">
+                                            <button type="submit" class="button-danger" onclick="return confirm('Are you sure you want to delete this equipment?')">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No equipment found. Add some using the button above.</p>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+</body>
+</html>

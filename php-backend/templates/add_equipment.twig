@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PLE System - Add Equipment</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Add New Equipment</h1>
+            <nav>
+                <a href="index.php" class="button">Back to List</a>
+            </nav>
+        </header>
+
+        <main>
+            <form method="POST" action="index.php?action=addEquipment" class="equipment-form">
+                <div class="form-group">
+                    <label for="type">Equipment Type:</label>
+                    <select name="type" id="type" required>
+                        <option value="">Select Type</option>
+                        <option value="Walkie-stacker">Walkie-stacker (R-series)</option>
+                        <option value="Electric Jack">Electric Jack (E-series)</option>
+                        <option value="Fork-lift">Fork-lift (F-series)</option>
+                        <option value="Scissor lift">Scissor lift (S-series)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="pleId">PLE ID:</label>
+                    <input type="text" name="pleId" id="pleId" required pattern="[REFS][0-9]+" title="Must start with R, E, F, or S followed by numbers">
+                    <small>Format: R1, E2, F1, S1 (matching the equipment type)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="make">Make:</label>
+                    <input type="text" name="make" id="make" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="model">Model:</label>
+                    <input type="text" name="model" id="model" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="serialNumber">Serial Number:</label>
+                    <input type="text" name="serialNumber" id="serialNumber" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="department">Department:</label>
+                    <select name="department" id="department" required>
+                        <option value="">Select Department</option>
+                        <option value="Big Backroom">Big Backroom</option>
+                        <option value="Garden Center">Garden Center</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="button-primary">Add Equipment</button>
+            </form>
+        </main>
+    </div>
+</body>
+</html>
