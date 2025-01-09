@@ -17,7 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: php-backend
+        working-directory: ./php-backend
+
+    env:
+      working-directory: ./php-backend
 
     steps:
       - uses: actions/checkout@v3
@@ -44,10 +47,21 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
       - name: Install dependencies
         run: |
           composer install --prefer-dist --no-progress
-          composer require --dev squizlabs/php_codesniffer phpstan/phpstan
+          composer require --dev squizlabs/php_codesniffer:^3.7 phpstan/phpstan:^1.10
 
       - name: Run PHPCS Auto-Fix
         if: github.event_name == 'pull_request'
