@@ -27,6 +27,31 @@ namespace PLEPHP\Model;
  * @property bool $taggedOutOfService
  * @property string $workOrderNumber
  */
-class Checklist extends \RedBeanPHP\OODBBean
+class Checklist implements \RedBeanPHP\Model
 {
+    private \RedBeanPHP\OODBBean $bean;
+
+    public function loadBean(\RedBeanPHP\OODBBean $bean)
+    {
+        $this->bean = $bean;
+    }
+
+    /**
+     * @param string $property
+     * @return mixed
+     */
+    public function __get(string $property)
+    {
+        return $this->bean->$property;
+    }
+
+    /**
+     * @param string $property
+     * @param mixed $value
+     * @return void
+     */
+    public function __set(string $property, $value): void
+    {
+        $this->bean->$property = $value;
+    }
 }

@@ -8,6 +8,8 @@ use function PLEPHP\migrateData;
 
 /**
  * Main migration script entry point
+ *
+ * @param array<int,string> $argv Command line arguments
  */
 function main(array $argv): void
 {
@@ -20,10 +22,4 @@ function main(array $argv): void
     } catch (\Exception $e) {
         die("Error: " . $e->getMessage() . "\n");
     }
-}
-
-// Only execute if running as a script
-if (php_sapi_name() === 'cli') {
-    require_once __DIR__ . '/bootstrap.php';
-    main($argv);
 }

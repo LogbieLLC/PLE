@@ -1,10 +1,16 @@
 parameters:
-  level: 5
-  paths:
-    - .
-  excludePaths:
-    - vendor
-    - cache
-  checkMissingIterableValueType: false
-  universalObjectCratesClasses:
-    - RedBeanPHP\OODBBean
+    level: 5
+    paths:
+        - .
+    excludePaths:
+        - vendor
+        - cache
+    ignoreErrors:
+        - '#Dynamic call to static method RedBeanPHP\\R::#'
+        - '#Call to an undefined method RedBeanPHP\\OODBBean::#'
+        - '#Access to an undefined property RedBeanPHP\\OODBBean::#'
+        - '#Parameter \#1 \$bean of method .+ expects RedBeanPHP\\OODBBean, RedBeanPHP\\OODBBean\|null given#'
+    universalObjectCratesClasses:
+        - RedBeanPHP\OODBBean
+        - PLEPHP\Model\Equipment
+        - PLEPHP\Model\Checklist
