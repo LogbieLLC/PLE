@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use RedBeanPHP\R;
+
 use function PLEPHP\requireAuth;
 
 require_once __DIR__ . '/bootstrap.php';

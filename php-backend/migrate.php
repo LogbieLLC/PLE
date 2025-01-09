@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use RedBeanPHP\R;
+
 use function PLEPHP\normalizeId;
 
 require_once __DIR__ . '/bootstrap.php';
