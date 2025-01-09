@@ -1,13 +1,15 @@
 <?php
 
-require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/config.php';
-
-session_start();
+declare(strict_types=1);
 
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 use RedBeanPHP\R;
+
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/config.php';
+
+session_start();
 
 // Setup Twig
 $loader = new FilesystemLoader(__DIR__ . '/templates');
@@ -19,8 +21,12 @@ $twig = new Environment($loader, [
 // Add global user data to Twig
 $twig->addGlobal('user', $_SESSION['user'] ?? null);
 
-// Authentication middleware
-function requireAuth()
+/**
+ * Authentication middleware to ensure user is logged in
+ *
+ * @return void
+ */
+function requireAuth(): void
 {
     if (!isset($_SESSION['user'])) {
         header('Location: index.php?action=login');

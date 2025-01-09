@@ -1,16 +1,31 @@
 <?php
 
-require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/config.php';
+declare(strict_types=1);
 
 use RedBeanPHP\R;
 
-function normalizeId($pleId)
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/config.php';
+
+/**
+ * Normalize a PLE ID by converting to uppercase and trimming whitespace
+ *
+ * @param string $pleId The PLE ID to normalize
+ * @return string The normalized PLE ID
+ */
+function normalizeId(string $pleId): string
 {
     return strtoupper(trim($pleId));
 }
 
-function migrateData($jsonFile)
+/**
+ * Migrate data from JSON export file to database
+ *
+ * @param string $jsonFile Path to the JSON file containing exported data
+ * @throws \Exception If file not found or JSON is invalid
+ * @return void
+ */
+function migrateData(string $jsonFile): void
 {
     if (!file_exists($jsonFile)) {
         throw new \Exception("JSON file not found: $jsonFile");
