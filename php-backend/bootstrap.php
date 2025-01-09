@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Application Bootstrap Module
  *
@@ -22,7 +23,8 @@ require_once __DIR__ . '/config.php';
 
 // Configure RedBean model namespace
 \RedBeanPHP\R::ext(
-    'equipment', function ($bean) {
+    'equipment',
+    function ($bean) {
         $model = new \PLEPHP\Model\Equipment();
         $model->loadBean($bean);
         return $model;
@@ -30,7 +32,8 @@ require_once __DIR__ . '/config.php';
 );
 
 \RedBeanPHP\R::ext(
-    'checklist', function ($bean) {
+    'checklist',
+    function ($bean) {
         $model = new \PLEPHP\Model\Checklist();
         $model->loadBean($bean);
         return $model;
@@ -56,7 +59,8 @@ if (!\RedBeanPHP\R::count('user')) {
 // Setup Twig
 $loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/templates');
 $GLOBALS['twig'] = new \Twig\Environment(
-    $loader, [
+    $loader,
+    [
     'cache' => __DIR__ . '/cache',
     'debug' => !getenv('APP_ENV') || getenv('APP_ENV') !== 'production'
     ]

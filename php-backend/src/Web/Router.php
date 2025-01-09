@@ -1,13 +1,13 @@
 <?php
 
 /**
- * Application Entry Point
+ * Web Router Module
  *
- * This file serves as the main entry point for the PLE system.
+ * This file contains the main routing logic for the PLE system web interface.
  *
  * PHP version 7.4
  *
- * @category  Application
+ * @category  Web
  * @package   PLEPHP\Web
  * @author    Devin AI <devin@logbie.com>
  * @copyright 2024 Logbie LLC
@@ -17,9 +17,16 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/bootstrap.php';
+namespace PLEPHP\Web;
 
-use function PLEPHP\Web\handleRoute;
+use RedBeanPHP\R;
+use function PLEPHP\requireAuth;
+
+/**
+ * Handle the main routing logic for the application
+ */
+function handleRoute(): void
+{
     $action = $_GET['action'] ?? 'home';
     $method = $_SERVER['REQUEST_METHOD'];
 
@@ -136,9 +143,9 @@ use function PLEPHP\Web\handleRoute;
                         'inspection_lock',
                         ' ple_id = ? AND inspector_id = ? AND created > ? ',
                         [
-                        $_POST['pleId'],
-                        $_SESSION['user']['id'],
-                        date('Y-m-d H:i:s', strtotime('-30 minutes'))
+                            $_POST['pleId'],
+                            $_SESSION['user']['id'],
+                            date('Y-m-d H:i:s', strtotime('-30 minutes'))
                         ]
                     );
 
@@ -208,9 +215,9 @@ use function PLEPHP\Web\handleRoute;
 
                     if ($user && password_verify($password, $user->password)) {
                         $_SESSION['user'] = [
-                        'id' => $user->id,
-                        'username' => $user->username,
-                        'role' => $user->role
+                            'id' => $user->id,
+                            'username' => $user->username,
+                            'role' => $user->role
                         ];
                         header('Location: index.php');
                         exit;
@@ -240,6 +247,3 @@ use function PLEPHP\Web\handleRoute;
         echo $GLOBALS['twig']->render('error.twig', ['message' => $e->getMessage()]);
     }
 }
-
-// Execute routing
-handleRoute();
