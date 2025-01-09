@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PLE Pre-Operational Checklist (Local w/ IndexedDB)</title>
+  <link rel="stylesheet" href="style.css" />
+  
+  <!-- Vue 3 (UMD build) -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <!-- Dexie.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/dexie@3/dist/dexie.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <!-- Inspection Walk Section -->
+      <section class="section" v-if="!isWalkInProgress">
+        <h2 class="section-title">Start Inspection Walk</h2>
+        <button @click="startWalk" class="button button-primary" :disabled="!equipmentList.length">
+          Start New Walk
+        </button>
+      </section>
+
+      <!-- Checklist History Section -->
+      <section class="section" v-if="!isWalkInProgress">
+        <h2 class="section-title">Inspection History</h2>
+        <div class="checklist-list">
+          <div v-for="checklist in checklistHistory" :key="checklist.id" class="checklist-item">
+            <div class="checklist-header">
+              <strong>{{ checklist.pleId }}</strong>
+              <span>{{ formatDate(checklist.dateInspected) }}</span>
+              <span>Inspector: {{ checklist.inspectorInitials }}</span>
+            </div>
+            <div class="checklist-details" v-if="checklist.repairRequired">
+              <span class="tag tag-warning">Repair Required</span>
+              <span v-if="checklist.taggedOutOfService" class="tag tag-danger">Tagged Out</span>
+              <span v-if="checklist.workOrderNumber" class="tag tag-info">WO: {{ checklist.workOrderNumber }}</span>
+            </div>
+            <div class="checklist-status">
+              <span :class="['status-dot', checklist.damage ? 'status-success' : 'status-danger']" title="Damage Check"></span>
+              <span :class="['status-dot', checklist.leaks ? 'status-success' : 'status-danger']" title="Leaks Check"></span>
+              <span :class="['status-dot', checklist.safetyDevices ? 'status-success' : 'status-danger']" title="Safety Devices"></span>
+              <span :class="['status-dot', checklist.operation ? 'status-success' : 'status-danger']" title="Operation Check"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Equipment Management Section -->
+      <section class="section">
+        <h2 class="section-title">Equipment Management</h2>
+        <form @submit.prevent="addEquipment" class="form">
+          <div class="form-group">
+            <label class="form-label required">PLE ID</label>
+            <input type="text" v-model="newEquipment.pleId" class="form-input" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label required">Type</label>
+            <input type="text" v-model="newEquipment.type" class="form-input" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label required">Make</label>
+            <input type="text" v-model="newEquipment.make" class="form-input" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label required">Model</label>
+            <input type="text" v-model="newEquipment.model" class="form-input" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label required">Serial Number</label>
+            <input type="text" v-model="newEquipment.serialNumber" class="form-input" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label required">Department</label>
+            <input type="text" v-model="newEquipment.department" class="form-input" required>
+          </div>
+          
+          <button type="submit" class="button button-primary">Add Equipment</button>
+        </form>
+        
+        <div class="equipment-list">
+          <div v-for="equipment in equipmentList" :key="equipment.id" class="equipment-item">
+            <div class="equipment-info">
+              <strong>{{ equipment.pleId }}</strong> - 
+              {{ equipment.type }} | 
+              {{ equipment.make }} {{ equipment.model }} | 
+              SN: {{ equipment.serialNumber }} | 
+              Dept: {{ equipment.department }}
+            </div>
+            <div class="equipment-actions">
+              <button @click="deleteEquipment(equipment.id)" class="button button-danger">Delete</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- System Management Section -->
+      <section class="section">
+        <h2 class="section-title">System Management</h2>
+        <div class="button-group">
+          <button @click="exportDatabase" class="button button-primary">Export Database</button>
+          <button @click="resetDatabase" class="button button-danger">Reset Database</button>
+          <button @click="initDatabase" class="button button-info">Initialize Database</button>
+        </div>
+      </section>
+
+      <!-- Active Walk Section -->
+      <section class="section" v-if="isWalkInProgress">
+        <h2 class="section-title">Inspection Walk in Progress</h2>
+        
+        <!-- Inspector Information -->
+        <form @submit.prevent="saveWalk" class="form">
+          <div class="form-group">
+            <label class="form-label required">Inspector Initials</label>
+            <input type="text" v-model="currentWalk.inspectorInitials" class="form-input" required>
+          </div>
+
+          <!-- Equipment Inspections -->
+          <div v-for="(inspection, index) in currentWalk.equipmentInspections" :key="inspection.id" class="inspection-item">
+            <h3>{{ inspection.pleId }} Inspection</h3>
+            
+            <div class="checkboxes-group">
+              <label class="checkbox-label">
+                <input type="checkbox" v-model="inspection.damage">
+                No Damage
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" v-model="inspection.leaks">
+                No Leaks
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" v-model="inspection.safetyDevices">
+                Safety Devices Functional
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" v-model="inspection.operation">
+                Operation Normal
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Comments</label>
+              <textarea v-model="inspection.comments" class="form-input" rows="2"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" v-model="inspection.repairRequired">
+                Repair Required
+              </label>
+            </div>
+
+            <div class="form-group" v-if="inspection.repairRequired">
+              <label class="checkbox-label">
+                <input type="checkbox" v-model="inspection.taggedOutOfService">
+                Tagged Out of Service
+              </label>
+            </div>
+
+            <div class="form-group" v-if="inspection.repairRequired">
+              <label class="form-label">Work Order Number</label>
+              <input type="text" v-model="inspection.workOrderNumber" class="form-input">
+            </div>
+          </div>
+
+          <div class="button-group">
+            <button type="submit" class="button button-primary">Complete Walk</button>
+            <button type="button" @click="cancelWalk" class="button button-danger">Cancel Walk</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+  
+  <script>
+    /**
+     * Initialize Dexie database with two tables:
+     * 1. equipment - for storing PLE inventory
+     * 2. checklists - for storing inspection records
+     */
+    const db = new Dexie("PLEChecklistsDB");
+    
+    // Initialize database with version 2 to add pleIdNormalized field
+    db.version(1).stores({
+      equipment: "++id, pleId, type, make, model, serialNumber, department",
+      checklists: "++id, pleId, dateInspected, inspectorInitials, timeInspected"
+    });
+    
+    // Upgrade to version 2: Add pleIdNormalized field and index
+    db.version(2).stores({
+      equipment: "++id, pleId, pleIdNormalized, type, make, model, serialNumber, department",
+      checklists: "++id, pleId, dateInspected, inspectorInitials, timeInspected"
+    }).upgrade(tx => {
+      // Migrate existing equipment records to include pleIdNormalized
+      return tx.equipment.toCollection().modify(equipment => {
+        if (!equipment.pleIdNormalized) {
+          equipment.pleIdNormalized = equipment.pleId.trim().toLowerCase();
+        }
+      });
+    });
+
+    // Vue app initialization
+    const { createApp } = Vue;
+    
+    createApp({
+      data() {
+        return {
+          checklistHistory: [],
+          newEquipment: {
+            pleId: "",
+            type: "",
+            make: "",
+            model: "",
+            serialNumber: "",
+            department: ""
+          },
+          equipmentList: [],
+          isWalkInProgress: false,
+          currentWalk: {
+            dateInspected: "",
+            timeInspected: "",
+            inspectorInitials: "",
+            equipmentInspections: []
+          }
+        };
+      },
+      async mounted() {
+        await this.fetchEquipment();
+        await this.fetchChecklistHistory();
+      },
+      methods: {
+        async fetchEquipment() {
+          // Fetch and sort equipment by department (case-insensitive) then PLE ID (case-insensitive)
+          const equipment = await db.equipment.toArray();
+          this.equipmentList = equipment.sort((a, b) => {
+            // First compare departments case-insensitively
+            const deptCompare = a.department.toLowerCase().localeCompare(b.department.toLowerCase());
+            if (deptCompare !== 0) return deptCompare;
+            
+            // If same department, compare PLE IDs using normalized values
+            return a.pleIdNormalized.localeCompare(b.pleIdNormalized);
+          });
+        },
+        
+        async addEquipment() {
+          // Validate required fields
+          if (!this.newEquipment.pleId || !this.newEquipment.type || 
+              !this.newEquipment.make || !this.newEquipment.model || 
+              !this.newEquipment.serialNumber || !this.newEquipment.department) {
+            alert("Please fill out all required fields");
+            return;
+          }
+          
+          // Generate normalized (lowercase) version of PLE ID and check for duplicates
+          const normalizedId = this.newEquipment.pleId.trim().toLowerCase();
+          
+          // Check for case-insensitive duplicates
+          const existingEquipment = await db.equipment
+            .where('pleIdNormalized')
+            .equals(normalizedId)
+            .first();
+            
+          if (existingEquipment) {
+            alert(`A PLE with ID "${existingEquipment.pleId}" already exists. PLE IDs must be unique regardless of letter case.`);
+            return;
+          }
+          
+          // Prepare equipment data with both original and normalized PLE ID
+          const equipmentData = {
+            pleId: this.newEquipment.pleId,
+            pleIdNormalized: normalizedId,
+            type: this.newEquipment.type,
+            make: this.newEquipment.make,
+            model: this.newEquipment.model,
+            serialNumber: this.newEquipment.serialNumber,
+            department: this.newEquipment.department
+          };
+          
+          // Add to IndexedDB
+          await db.equipment.add(equipmentData);
+          
+          // Reset form and refresh list
+          this.newEquipment = {
+            pleId: "",
+            type: "",
+            make: "",
+            model: "",
+            serialNumber: "",
+            department: ""
+          };
+          await this.fetchEquipment();
+        },
+        
+        async deleteEquipment(id) {
+          if (!confirm("Are you sure you want to delete this equipment?")) {
+            return;
+          }
+          await db.equipment.delete(id);
+          await this.fetchEquipment();
+        },
+        
+        startWalk() {
+          const now = new Date();
+          const hours = now.getHours();
+          
+          // Validate time window (12:00 AM to 7:00 AM)
+          if (hours >= 7 && hours < 24) {
+            alert("Inspections can only be performed between 12:00 AM and 7:00 AM");
+            return;
+          }
+          
+          this.isWalkInProgress = true;
+          this.currentWalk = {
+            dateInspected: now.toISOString().split('T')[0],
+            timeInspected: now.toTimeString().split(' ')[0],
+            inspectorInitials: "",
+            equipmentInspections: this.equipmentList.map(e => ({
+              id: e.id,
+              pleId: e.pleId,
+              damage: false,
+              leaks: false,
+              safetyDevices: false,
+              operation: false,
+              repairRequired: false,
+              taggedOutOfService: false,
+              workOrderNumber: "",
+              comments: ""
+            }))
+          };
+        },
+        
+        async saveWalk() {
+          if (!this.currentWalk.inspectorInitials) {
+            alert("Please enter inspector initials");
+            return;
+          }
+          
+          // Save each equipment inspection to the checklists table
+          for (const inspection of this.currentWalk.equipmentInspections) {
+            await db.checklists.add({
+              pleId: inspection.pleId,
+              dateInspected: this.currentWalk.dateInspected,
+              timeInspected: this.currentWalk.timeInspected,
+              inspectorInitials: this.currentWalk.inspectorInitials,
+              damage: inspection.damage,
+              leaks: inspection.leaks,
+              safetyDevices: inspection.safetyDevices,
+              operation: inspection.operation,
+              repairRequired: inspection.repairRequired,
+              taggedOutOfService: inspection.taggedOutOfService,
+              workOrderNumber: inspection.workOrderNumber,
+              comments: inspection.comments
+            });
+          }
+          
+          this.isWalkInProgress = false;
+          this.currentWalk = {
+            dateInspected: "",
+            timeInspected: "",
+            inspectorInitials: "",
+            equipmentInspections: []
+          };
+          
+          // Refresh the checklist history after saving
+          await this.fetchChecklistHistory();
+        },
+        
+        cancelWalk() {
+          if (confirm("Are you sure you want to cancel this inspection walk?")) {
+            this.isWalkInProgress = false;
+            this.currentWalk = {
+              dateInspected: "",
+              timeInspected: "",
+              inspectorInitials: "",
+              equipmentInspections: []
+            };
+          }
+        },
+
+        async fetchChecklistHistory() {
+          this.checklistHistory = await db.checklists
+            .orderBy('dateInspected')
+            .reverse()
+            .toArray();
+        },
+
+        formatDate(dateStr) {
+          return new Date(dateStr).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          });
+        },
+
+        async initDatabase() {
+          if (!confirm("Do you want to initialize the database with pre-filled equipment? This may add duplicates if your database isn't empty.")) {
+            return;
+          }
+          
+          try {
+            const DEFAULT_EQUIPMENT = [
+              {
+                pleId: "R3",
+                pleIdNormalized: "r3",
+                type: "Walkie-stacker",
+                make: "Yale",
+                model: "RS540",
+                serialNumber: "b895-n080130",
+                department: "Big Backroom"
+              },
+              {
+                pleId: "R4",
+                pleIdNormalized: "r4",
+                type: "Walkie-stacker",
+                make: "Raymond",
+                model: "msw0405fn24tr087",
+                serialNumber: "rss-21-07887",
+                department: "Garden Center"
+              },
+              {
+                pleId: "E1",
+                pleIdNormalized: "e1",
+                type: "Electric Jack",
+                make: "Raymond",
+                model: "102t-f451",
+                serialNumber: "102-15-35810",
+                department: "Big Backroom"
+              },
+              {
+                pleId: "E2",
+                pleIdNormalized: "e2",
+                type: "Electric Jack",
+                make: "Raymond",
+                model: "8210",
+                serialNumber: "821-19-58816",
+                department: "Big Backroom"
+              },
+              {
+                pleId: "F1",
+                pleIdNormalized: "f1",
+                type: "Fork-lift",
+                make: "Crown",
+                model: "c51050-50",
+                serialNumber: "10053860",
+                department: "Garden Center"
+              },
+              {
+                pleId: "S1",
+                pleIdNormalized: "s1",
+                type: "Scissor lift",
+                make: "Genie",
+                model: "gs-2432",
+                serialNumber: "gs3216p-144321",
+                department: "Garden Center"
+              }
+            ];
+            
+            await db.equipment.bulkAdd(DEFAULT_EQUIPMENT);
+            await this.fetchEquipment();  // Refresh the in-memory list
+            alert("Database has been initialized with pre-filled equipment.");
+          } catch (error) {
+            console.error('Initialize DB failed:', error);
+            alert("Failed to initialize database. Please try again.");
+          }
+        },
+
+        async exportDatabase() {
+          try {
+            // Export equipment data
+            const equipment = await db.equipment.toArray();
+            // Export checklists data
+            const checklists = await db.checklists.toArray();
+            
+            // Combine into single export object
+            const exportData = {
+              equipment,
+              checklists,
+              exportDate: new Date().toISOString(),
+              version: "1.0"
+            };
+            
+            // Convert to JSON and create blob
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            // Create download link and trigger download
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ple-checklist-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            
+            // Cleanup
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          } catch (error) {
+            console.error('Export failed:', error);
+            alert('Failed to export database. Please try again.');
+          }
+        },
+
+        async resetDatabase() {
+          if (!confirm('WARNING: This will permanently delete all equipment and inspection records. This action cannot be undone. Are you sure you want to proceed?')) {
+            return;
+          }
+          
+          try {
+            // Clear all tables
+            await db.equipment.clear();
+            await db.checklists.clear();
+            
+            // Reset local data
+            this.equipmentList = [];
+            this.checklistHistory = [];
+            
+            alert('Database has been reset successfully.');
+          } catch (error) {
+            console.error('Reset failed:', error);
+            alert('Failed to reset database. Please try again.');
+          }
+        }
+      }
+    }).mount("#app");
+  </script>
+</body>
+</html>
