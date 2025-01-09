@@ -2,19 +2,22 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/bootstrap.php';
+
 namespace PLEPHP\Web;
 
 use RedBeanPHP\R;
-
 use function PLEPHP\requireAuth;
 
-require_once __DIR__ . '/bootstrap.php';
+/**
+ * Handle the main routing logic for the application
+ */
+function handleRoute(): void
+{
+    $action = $_GET['action'] ?? 'home';
+    $method = $_SERVER['REQUEST_METHOD'];
 
-// Basic routing
-$action = $_GET['action'] ?? 'home';
-$method = $_SERVER['REQUEST_METHOD'];
-
-try {
+    try {
     switch ($action) {
         case 'home':
             requireAuth();
@@ -225,8 +228,14 @@ try {
             echo $GLOBALS['twig']->render('404.twig');
             break;
     }
-} catch (\Exception $e) {
-    error_log($e->getMessage());
-    http_response_code(500);
-    echo $GLOBALS['twig']->render('error.twig', ['message' => $e->getMessage()]);
+    } catch (\Exception $e) {
+        error_log($e->getMessage());
+        http_response_code(500);
+        echo $GLOBALS['twig']->render('error.twig', ['message' => $e->getMessage()]);
+    }
+}
+
+// Only execute if running as a script
+if (php_sapi_name() !== 'cli') {
+    handleRoute();
 }
