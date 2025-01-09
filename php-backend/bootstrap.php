@@ -6,13 +6,13 @@ require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config.php';
 
 // Configure RedBean model namespace
-\RedBeanPHP\R::ext('equipment', function($bean) {
+\RedBeanPHP\R::ext('equipment', function ($bean) {
     $model = new \PLEPHP\Model\Equipment();
     $model->loadBean($bean);
     return $model;
 });
 
-\RedBeanPHP\R::ext('checklist', function($bean) {
+\RedBeanPHP\R::ext('checklist', function ($bean) {
     $model = new \PLEPHP\Model\Checklist();
     $model->loadBean($bean);
     return $model;
