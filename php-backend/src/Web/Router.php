@@ -13,16 +13,20 @@ use function PLEPHP\requireAuth;
  */
 function handleRoute(): void
 {
-    // Ensure clean output buffer at the start
-    while (ob_get_level() > 0) {
-        ob_end_clean();
+    // Clean any existing buffers and start fresh
+    while (true) {
+        $level = ob_get_level();
+        if ($level <= 0) {
+            break;
+        }
+        @ob_end_clean();
     }
 
     // Start fresh output buffer for all operations
-    ob_start();
+    @ob_start();
 
     // Wrap all database operations in a nested buffer
-    ob_start();
+    @ob_start();
 
     $action = $_GET['action'] ?? 'home';
     $method = $_SERVER['REQUEST_METHOD'];
@@ -262,39 +266,18 @@ function handleRoute(): void
     } catch (\Exception $e) {
         error_log($e->getMessage());
         http_response_code(500);
+        $errorMessage = $e->getMessage();
 
         // Clean all output buffers
-        while (ob_get_level() > 0) {
-            ob_end_clean();
-        }
-
-        // Start fresh buffer for error page
-        ob_start();
-        echo $GLOBALS['twig']->render('error.twig', ['message' => $e->getMessage()]);
-        ob_end_flush();
-    }
-
-    // Clean up any remaining database output buffer
-    // Clean all output buffers
-    try {
-        while (ob_get_level() !== 0) {
-            if (!@ob_end_clean()) {
-                throw new \RuntimeException('Failed to clean output buffer');
+        while (true) {
+            $level = ob_get_level();
+            if ($level <= 0) {
+                break;
             }
-        }
-        // Start a new buffer for final output
-        if (!@ob_start()) {
-            throw new \RuntimeException('Failed to start output buffer');
-        }
-        echo $GLOBALS['twig']->render('error.twig', ['message' => $e->getMessage()]);
-        if (!@ob_end_flush()) {
-            throw new \RuntimeException('Failed to flush output buffer');
-        }
-    } catch (\Exception $bufferException) {
-        error_log('Buffer cleanup failed: ' . $bufferException->getMessage());
-        // Ensure a clean state
-        while (ob_get_level() !== 0) {
             @ob_end_clean();
         }
+
+        // Render error page directly
+        echo $GLOBALS['twig']->render('error.twig', ['message' => $errorMessage]);
     }
 }
