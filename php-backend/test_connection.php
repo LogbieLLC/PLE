@@ -15,15 +15,15 @@ try {
     if (\RedBeanPHP\R::testConnection()) {
         echo "Database connection successful!\n";
         echo "Testing model configuration...\n";
-        
+
         // Test equipment model
         $equipment = \RedBeanPHP\R::dispense('equipment');
         echo "Equipment model OK\n";
-        
+
         // Test checklist model
         $checklist = \RedBeanPHP\R::dispense('checklist');
         echo "Checklist model OK\n";
-        
+
         echo "\nAll tests passed successfully!\n";
     } else {
         echo "Database connection failed!\n";
