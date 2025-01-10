@@ -2,6 +2,7 @@
   "name": "logbiellc/ple-php-backend",
   "description": "PHP-based reimplementation of PLE system with SQLite",
   "type": "project",
+  "license": "proprietary",
   "require": {
     "php": ">=7.4",
     "twig/twig": "^3.0",
