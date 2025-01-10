@@ -5,11 +5,8 @@ parameters:
     excludePaths:
         - vendor
         - cache
-    ignoreErrors:
-        - '#Dynamic call to static method RedBeanPHP\\R::#'
-        - '#Call to an undefined method RedBeanPHP\\OODBBean::#'
-        - '#Access to an undefined property RedBeanPHP\\OODBBean::#'
-        - '#Parameter \#1 \$bean of method .+ expects RedBeanPHP\\OODBBean, RedBeanPHP\\OODBBean\|null given#'
+    scanDirectories:
+        - vendor/gabordemooij/redbean
     universalObjectCratesClasses:
         - RedBeanPHP\OODBBean
         - PLEPHP\Model\Equipment
