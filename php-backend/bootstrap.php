@@ -25,7 +25,7 @@ if (!\RedBeanPHP\R::testConnection()) {
 ob_start();
 try {
     $userCount = \RedBeanPHP\R::count('user');
-    
+
     if (!$userCount) {
         // Create temporary admin user for testing
         // TODO: Remove or change credentials before deploying to production
