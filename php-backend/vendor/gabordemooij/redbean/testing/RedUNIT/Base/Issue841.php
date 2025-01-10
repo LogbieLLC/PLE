@@ -7,7 +7,7 @@ use RedBeanPHP\Facade as R;
 
 /**
  * Issue 841
- * 
+ *
  * After bindFunc() Shared List cannot remove items.
  *
  * @file    RedUNIT/Base/Issue841.php

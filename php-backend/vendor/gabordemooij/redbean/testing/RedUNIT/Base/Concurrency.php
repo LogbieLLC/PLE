@@ -137,7 +137,7 @@ class Concurrency extends Base
 			R::exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ');
 			echo "PARENT: PREP DONE\n";
 			sleep(3);
-			echo "PARENT: ADDING 5 START\n"; 
+			echo "PARENT: ADDING 5 START\n";
 			try { R::exec('SET autocommit = 0'); }catch( \Exception $e ){}
 			R::freeze( TRUE );
 			R::begin();
@@ -153,7 +153,7 @@ class Concurrency extends Base
 			asrt((int)$i[0]['apples'], 13);
 			R::freeze( FALSE );
 			try { R::exec('SET autocommit = 1'); }catch( \Exception $e ){}
-			pcntl_wait($status); 
+			pcntl_wait($status);
 		}
 	}
 

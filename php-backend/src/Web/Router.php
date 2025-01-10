@@ -164,9 +164,9 @@ function handleRoute(): void
 
                     if ($activeInspection) {
                         // Allow admin override or timeout-based takeover
-                        $canTakeOver = $_SESSION['user']['role'] === 'admin' || 
+                        $canTakeOver = $_SESSION['user']['role'] === 'admin' ||
                                      strtotime($activeInspection->created) < strtotime('-30 minutes');
-                        
+
                         if (!$canTakeOver) {
                             throw new \Exception(sprintf(
                                 "This equipment is currently being inspected by %s since %s",
@@ -231,7 +231,7 @@ function handleRoute(): void
                 }
 
                 $equipment = R::findAll('equipment', ' ORDER BY ple_id');
-                
+
                 // Check for existing locks and notifications
                 $currentLock = null;
                 $previousLock = null;
@@ -299,7 +299,7 @@ function handleRoute(): void
 
             case 'takeOverInspection':
                 requireAuth();
-                
+
                 $pleId = $_GET['pleId'] ?? '';
                 if (!$pleId) {
                     throw new \Exception("Equipment ID required");
@@ -322,7 +322,7 @@ function handleRoute(): void
                 // Check if user is admin or lock is expired
                 $isAdmin = ($_SESSION['user']['role'] ?? '') === 'admin';
                 $isExpired = strtotime($existingLock->created) < strtotime('-30 minutes');
-                
+
                 if (!$isAdmin && !$isExpired) {
                     throw new \Exception("Cannot take control: inspection is still active");
                 }
@@ -334,50 +334,7 @@ function handleRoute(): void
                 }
                 $existingLock->inspector_id = $_SESSION['user']['id'];
                 $existingLock->created = date('Y-m-d H:i:s');
-                
-                R::store($existingLock);
 
-                header('Location: index.php?action=addInspection&pleId=' . urlencode($pleId));
-                exit;
-
-            case 'takeOverInspection':
-                requireAuth();
-                
-                $pleId = $_GET['pleId'] ?? '';
-                if (!$pleId) {
-                    throw new \Exception("Equipment ID required");
-                }
-
-                // Check for existing lock
-                $existingLock = R::findOne(
-                    'inspection_lock',
-                    ' ple_id = ? AND created > ? ',
-                    [
-                        $pleId,
-                        date('Y-m-d H:i:s', strtotime('-30 minutes'))
-                    ]
-                );
-
-                if (!$existingLock) {
-                    throw new \Exception("No active inspection found");
-                }
-
-                // Check if user is admin or lock is expired
-                $isAdmin = ($_SESSION['user']['role'] ?? '') === 'admin';
-                $isExpired = strtotime($existingLock->created) < strtotime('-30 minutes');
-                
-                if (!$isAdmin && !$isExpired) {
-                    throw new \Exception("Cannot take control: inspection is still active");
-                }
-
-                // Take control of the inspection
-                if ($isAdmin) {
-                    $existingLock->force_taken_by = $_SESSION['user']['id'];
-                    $existingLock->force_taken_at = date('Y-m-d H:i:s');
-                }
-                $existingLock->inspector_id = $_SESSION['user']['id'];
-                $existingLock->created = date('Y-m-d H:i:s');
-                
                 R::store($existingLock);
 
                 header('Location: index.php?action=addInspection&pleId=' . urlencode($pleId));

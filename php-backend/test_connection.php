@@ -29,7 +29,7 @@ try {
             throw new \Exception("Failed to create inspection_lock model");
         }
         echo "Inspection lock model OK\n";
-        
+
         // Test model properties
         $lock->ple_id = 'TEST1';
         $lock->inspector_id = 1;
@@ -39,7 +39,7 @@ try {
         \RedBeanPHP\R::store($lock);
         echo "Lock properties test OK\n";
         \RedBeanPHP\R::trash($lock);
-        
+
         echo "\nAll tests passed successfully!\n";
     } else {
         echo "Database connection failed!\n";

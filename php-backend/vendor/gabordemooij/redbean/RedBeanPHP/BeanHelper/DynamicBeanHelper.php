@@ -53,5 +53,5 @@ class DynamicBeanHelper extends SimpleFacadeBeanHelper implements BeanHelper
 	public function getModelForBean( OODBBean $bean )
 	{
 		return $this->resolveModel( $this->modelPrefix, $bean->getMeta( 'type' ), $bean );
-	}	
+	}
 }

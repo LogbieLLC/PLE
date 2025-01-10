@@ -149,7 +149,7 @@ class Hybrid extends Base
 		}
 		R::setAllowHybridMode( FALSE );
 	}
-	
+
 	/**
 	 * Test whether Hybrid mode is only activated
 	 * for latest or 5.4 without novice and ensure

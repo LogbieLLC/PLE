@@ -62,7 +62,7 @@ function initializeDatabase(): void
         ob_start();
 
         error_log('Registering model extensions...');
-        
+
         // Register model extensions first
         R::ext('equipment', function ($bean) {
             $model = new \PLEPHP\Model\Equipment();
@@ -117,7 +117,7 @@ function initializeDatabase(): void
             // Initialize core tables in dependency order
             foreach (['user', 'equipment', 'checklist', 'inspection_lock'] as $table) {
                 error_log("Creating table: $table");
-                
+
                 // Create and verify table
                 $bean = R::dispense($table);
                 if (!$bean) {

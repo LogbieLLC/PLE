@@ -64,7 +64,7 @@ class Tree {
 	 * Usage:
 	 *
 	 * <code>
-	 * $newsArticles = R::children( $newsPage, ' ORDER BY title ASC ' ) 
+	 * $newsArticles = R::children( $newsPage, ' ORDER BY title ASC ' )
 	 * $newsArticles = R::children( $newsPage, ' WHERE title = ? ', [ $t ] );
 	 * $newsArticles = R::children( $newsPage, ' WHERE title = :t ', [ ':t' => $t ] );
 	 * </code>

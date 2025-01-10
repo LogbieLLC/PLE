@@ -83,12 +83,12 @@ abstract class Repository
 	 * addition, deleted 'trash can' or residue. Next, the different groups
 	 * of beans will be processed accordingly and the reference bean (i.e.
 	 * the one that was passed to the method as an argument) will be stored.
-	 * Each type of list (own/shared) has 3 bean processors: 
+	 * Each type of list (own/shared) has 3 bean processors:
 	 *
 	 * - trashCanProcessor : removes the bean or breaks its association with the current bean
 	 * - additionProcessor : associates the bean with the current one
 	 * - residueProcessor  : manages beans in lists that 'remain' but may need to be updated
-	 * 
+	 *
 	 * This method first groups the beans and then calls the
 	 * internal processing methods.
 	 *
