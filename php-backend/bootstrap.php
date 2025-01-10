@@ -6,7 +6,10 @@ declare(strict_types=1);
 ob_start();
 
 require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/config.php';
+
+// Initialize database
+use function PLEPHP\Config\initializeDatabase;
+initializeDatabase();
 
 use function PLEPHP\Config\configureModels;
 
