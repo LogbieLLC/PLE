@@ -12,7 +12,10 @@ permissions:
   pull-requests: write
   checks: write
 
-# Limit concurrent runs of this workflow
+# Limit concurrent runs of this workflow and ensure checks run in order:
+# 1. PHPCS Auto-Fix (PRs only)
+# 2. PHPCS Manual Check
+# 3. PHPStan Analysis
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
