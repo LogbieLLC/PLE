@@ -21,6 +21,7 @@
       "src/Auth.php"
     ]
   },
+  "license": "proprietary",
   "config": {
     "sort-packages": true,
     "optimize-autoloader": true
