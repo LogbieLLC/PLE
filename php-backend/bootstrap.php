@@ -8,10 +8,8 @@ require_once __DIR__ . '/vendor/autoload.php';
 use function PLEPHP\Config\initializeDatabase;
 
 // Clean any existing output buffers
-$bufferLevel = ob_get_level();
-while ($bufferLevel > 0) {
+while (ob_get_level() >= 1) {
     ob_end_clean();
-    $bufferLevel = ob_get_level();
 }
 
 // Start fresh output buffer
