@@ -17,13 +17,13 @@ function handleRoute(): void
     while (ob_get_level() > 0) {
         ob_end_clean();
     }
-    
+
     // Start fresh output buffer for all operations
     ob_start();
 
     // Wrap all database operations in a nested buffer
     ob_start();
-    
+
     $action = $_GET['action'] ?? 'home';
     $method = $_SERVER['REQUEST_METHOD'];
 
@@ -262,12 +262,12 @@ function handleRoute(): void
     } catch (\Exception $e) {
         error_log($e->getMessage());
         http_response_code(500);
-        
+
         // Clean all output buffers
         while (ob_get_level() > 0) {
             ob_end_clean();
         }
-        
+
         // Start fresh buffer for error page
         ob_start();
         echo $GLOBALS['twig']->render('error.twig', ['message' => $e->getMessage()]);
