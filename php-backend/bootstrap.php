@@ -26,10 +26,11 @@ if (!\RedBeanPHP\R::testConnection()) {
 }
 
 if (!\RedBeanPHP\R::count('user')) {
-    // Create default admin user
+    // Create temporary admin user for testing
+    // TODO: Remove or change credentials before deploying to production
     $admin = \RedBeanPHP\R::dispense('user');
     $admin->username = 'admin';
-    $admin->password = password_hash('admin', PASSWORD_DEFAULT); // Change in production
+    $admin->password = password_hash('admin', PASSWORD_DEFAULT);
     $admin->role = 'admin';
     \RedBeanPHP\R::store($admin);
 }
