@@ -7,6 +7,14 @@
 - PHP Version: 8.2
 - Database: SQLite3
 
+## Required PHP Extensions
+- php8.2-fpm
+- php8.2-sqlite3
+- php8.2-mbstring
+- php8.2-intl
+- php8.2-xml
+- php8.2-curl
+
 ## Deployment Process
 
 ### 1. Package Preparation
@@ -121,3 +129,5 @@ systemctl restart nginx php8.2-fpm
 - Database directory permissions are 775
 - Application files are owned by www-data
 - SSL/TLS certificates pending setup
+- Configure firewall (UFW recommended)
+- Regular system package updates required
