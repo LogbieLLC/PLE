@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PLE Data Export</title>
+    <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .button { 
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .status {
+            margin-top: 1em;
+            padding: 1em;
+            border-radius: 4px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PLE System Data Export</h1>
+        <p>Use this tool to export your PLE system data for migration to the new PHP backend.</p>
+        
+        <button onclick="exportData()" class="button">Export Data</button>
+        <div id="status" class="status"></div>
+
+        <script>
+            // Initialize Dexie
+            const db = new Dexie("PLEChecklistsDB");
+            db.version(1).stores({
+                equipment: "++id,pleId,pleIdNormalized",
+                checklists: "++id,pleId,dateInspected"
+            });
+
+            async function exportData() {
+                try {
+                    const status = document.getElementById('status');
+                    status.className = 'status';
+                    status.textContent = 'Exporting data...';
+
+                    // Collect all data
+                    const equipment = await db.equipment.toArray();
+                    const checklists = await db.checklists.toArray();
+
+                    // Create export object
+                    const exportData = {
+                        equipment: equipment,
+                        checklists: checklists
+                    };
+
+                    // Convert to JSON and create download
+                    const blob = new Blob([JSON.stringify(exportData, null, 2)], 
+                        { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `ple_export_${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    // Show success message with counts
+                    status.className = 'status success';
+                    status.innerHTML = `
+                        Export successful!<br>
+                        Equipment items: ${equipment.length}<br>
+                        Checklist entries: ${checklists.length}<br>
+                        The file has been downloaded to your computer.
+                    `;
+                } catch (error) {
+                    console.error('Export failed:', error);
+                    status.className = 'status error';
+                    status.textContent = `Export failed: ${error.message}`;
+                }
+            }
+        </script>
+    </div>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PLE System - Edit Equipment</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Edit Equipment - {{ equipment.ple_id }}</h1>
+            <nav>
+                <a href="index.php" class="button">Back to List</a>
+            </nav>
+        </header>
+
+        <main>
+            <form method="POST" action="index.php?action=editEquipment&id={{ equipment.id }}" class="equipment-form">
+                <div class="form-group">
+                    <label for="type">Equipment Type:</label>
+                    <input type="text" value="{{ equipment.type }}" readonly disabled>
+                    <small>Type and PLE ID cannot be changed</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="ple_id">PLE ID:</label>
+                    <input type="text" value="{{ equipment.ple_id }}" readonly disabled>
+                </div>
+
+                <div class="form-group">
+                    <label for="make">Make:</label>
+                    <input type="text" name="make" id="make" value="{{ equipment.make }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="model">Model:</label>
+                    <input type="text" name="model" id="model" value="{{ equipment.model }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="serial_number">Serial Number:</label>
+                    <input type="text" name="serial_number" id="serial_number" value="{{ equipment.serial_number }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="department">Department:</label>
+                    <select name="department" id="department" required>
+                        <option value="Big Backroom" {% if equipment.department == 'Big Backroom' %}selected{% endif %}>Big Backroom</option>
+                        <option value="Garden Center" {% if equipment.department == 'Garden Center' %}selected{% endif %}>Garden Center</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="button-primary">Update Equipment</button>
+            </form>
+        </main>
+    </div>
+</body>
+</html>

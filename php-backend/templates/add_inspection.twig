@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PLE System - New Inspection</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>New Equipment Inspection</h1>
+            <nav>
+                <a href="index.php?action=inspections" class="button">Back to Inspections</a>
+            </nav>
+        </header>
+
+        <main>
+            <form method="POST" action="index.php?action=addInspection" class="inspection-form">
+                <div class="form-group">
+                    <label for="ple_id">Equipment:</label>
+                    <select name="ple_id" id="ple_id" required>
+                        <option value="">Select Equipment</option>
+                        {% for eq in equipment %}
+                            <option value="{{ eq.ple_id }}">{{ eq.ple_id }} - {{ eq.type }} ({{ eq.department }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="inspector_initials">Inspector Initials:</label>
+                    <input type="text" name="inspector_initials" id="inspector_initials" required maxlength="3" style="text-transform: uppercase;">
+                </div>
+
+                <fieldset>
+                    <legend>Inspection Categories</legend>
+                    
+                    <div class="form-check">
+                        <input type="checkbox" name="damage" id="damage">
+                        <label for="damage">Damage Found</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input type="checkbox" name="leaks" id="leaks">
+                        <label for="leaks">Leaks Present</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input type="checkbox" name="safety_devices" id="safety_devices">
+                        <label for="safety_devices">Safety Device Issues</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input type="checkbox" name="operation" id="operation">
+                        <label for="operation">Operational Issues</label>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Equipment Status</legend>
+                    
+                    <div class="form-check">
+                        <input type="checkbox" name="repair_required" id="repair_required">
+                        <label for="repair_required">Repair Required</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input type="checkbox" name="tagged_out_of_service" id="tagged_out_of_service">
+                        <label for="tagged_out_of_service">Tag Out of Service</label>
+                    </div>
+
+                    <div class="form-group" id="workOrderGroup" style="display: none;">
+                        <label for="work_order_number">Work Order Number:</label>
+                        <input type="text" name="work_order_number" id="work_order_number">
+                    </div>
+                </fieldset>
+
+                <div class="form-group">
+                    <label for="comments">Comments:</label>
+                    <textarea name="comments" id="comments" rows="4"></textarea>
+                </div>
+
+                <button type="submit" class="button-primary">Submit Inspection</button>
+            </form>
+
+            <script>
+                document.getElementById('repair_required').addEventListener('change', function() {
+                    document.getElementById('workOrderGroup').style.display = this.checked ? 'block' : 'none';
+                });
+            </script>
+        </main>
+    </div>
+</body>
+</html>
