@@ -61,26 +61,140 @@ function initializeDatabase(): void
         // Start output buffering for all database operations
         ob_start();
 
-        // Setup RedBean with configured PDO instance and no debug features
+        error_log('Registering model extensions...');
+        
+        // Register model extensions first
+        R::ext('equipment', function ($bean) {
+            $model = new \PLEPHP\Model\Equipment();
+            $model->loadBean($bean);
+            return $model;
+        });
+
+        R::ext('checklist', function ($bean) {
+            $model = new \PLEPHP\Model\Checklist();
+            $model->loadBean($bean);
+            return $model;
+        });
+
+        R::ext('inspection_lock', function ($bean) {
+            $model = new \PLEPHP\Model\InspectionLock();
+            $model->loadBean($bean);
+            return $model;
+        });
+
+        error_log('Model extensions registered');
+
+        // Setup RedBean with configured PDO instance
         R::setup($pdo);
         R::debug(false);
+        R::freeze(false); // Allow schema modifications
 
-        // Test connection and initialize admin user if needed
-        $userCount = R::count('user');
+        // Create base tables first
+        try {
+            error_log('Starting table initialization...');
 
-        if (!$userCount) {
-            $admin = R::dispense('user');
-            $admin->username = 'admin';
-            $admin->password = password_hash('admin', PASSWORD_DEFAULT);
-            $admin->role = 'admin';
-            R::store($admin);
+            // Register model extensions first
+            R::ext('equipment', function ($bean) {
+                $model = new \PLEPHP\Model\Equipment();
+                $model->loadBean($bean);
+                return $model;
+            });
+
+            R::ext('checklist', function ($bean) {
+                $model = new \PLEPHP\Model\Checklist();
+                $model->loadBean($bean);
+                return $model;
+            });
+
+            R::ext('inspection_lock', function ($bean) {
+                $model = new \PLEPHP\Model\InspectionLock();
+                $model->loadBean($bean);
+                return $model;
+            });
+
+            error_log('Model extensions registered');
+
+            // Initialize core tables in dependency order
+            foreach (['user', 'equipment', 'checklist', 'inspection_lock'] as $table) {
+                error_log("Creating table: $table");
+                
+                // Create and verify table
+                $bean = R::dispense($table);
+                if (!$bean) {
+                    throw new \Exception("Failed to create $table model");
+                }
+
+                // Add test data
+                switch ($table) {
+                    case 'inspection_lock':
+                        $bean->import([
+                            'ple_id' => 'TEST1',
+                            'inspector_id' => 1,
+                            'created' => date('Y-m-d H:i:s'),
+                            'force_taken_by' => null,
+                            'force_taken_at' => null
+                        ]);
+                        break;
+                    case 'equipment':
+                        $bean->import([
+                            'ple_id' => 'TEST1',
+                            'ple_id_normalized' => 'TEST1',
+                            'type' => 'test',
+                            'make' => 'test',
+                            'model' => 'test',
+                            'serial_number' => 'test',
+                            'department' => 'test'
+                        ]);
+                        break;
+                    case 'checklist':
+                        $bean->import([
+                            'ple_id' => 'TEST1',
+                            'date_inspected' => date('Y-m-d'),
+                            'time_inspected' => date('H:i:s'),
+                            'inspector_initials' => 'TST'
+                        ]);
+                        break;
+                }
+
+                // Store and verify
+                $id = R::store($bean);
+                if (!$id) {
+                    throw new \Exception("Failed to store $table bean");
+                }
+
+                // Verify table exists
+                if (!R::inspect($table)) {
+                    throw new \Exception("Failed to create table: $table");
+                }
+
+                // Clean up test bean
+                R::trash($bean);
+                error_log("Successfully created table: $table");
+            }
+
+            // Initialize admin user if needed
+            if (!R::count('user')) {
+                error_log('Creating admin user...');
+                $admin = R::dispense('user');
+                $admin->username = 'admin';
+                $admin->password = password_hash('admin', PASSWORD_DEFAULT);
+                $admin->role = 'admin';
+                R::store($admin);
+                error_log('Admin user created');
+            }
+
+            // Final connection test
+            if (!R::testConnection()) {
+                throw new \Exception('Database connection test failed');
+            }
+            error_log('All tables initialized successfully');
+        } catch (\Exception $e) {
+            error_log('Table initialization failed: ' . $e->getMessage());
+            throw $e;
+        } finally {
+            // Clear any SQL output
+            ob_end_clean();
         }
-
-        // Test connection
-        R::testConnection();
-
-        // Clear any SQL output
-        ob_end_clean();
     } catch (\Exception $e) {
         error_log('Database setup failed: ' . $e->getMessage());
         throw new \Exception('Database setup failed: ' . $e->getMessage());
