@@ -1,10 +1,11 @@
-# PLE System Deployment Guide
+# PLE System Deployment Documentation
 
-## Server Requirements
-- Ubuntu 24.04 LTS
-- PHP 8.2
-- Nginx
-- SQLite3
+## Production Server Details
+- IP Address: 143.244.164.33
+- Operating System: Ubuntu 24.04 LTS
+- Web Server: Nginx
+- PHP Version: 8.2
+- Database: SQLite3
 
 ## Required PHP Extensions
 - php8.2-fpm
@@ -14,9 +15,34 @@
 - php8.2-xml
 - php8.2-curl
 
-## Deployment Steps
+## Deployment Process
 
-### 1. Server Preparation
+### 1. Package Preparation
+```bash
+# Create deployment package
+cd ~/repos/PLE
+tar czf php-backend.tar.gz php-backend/
+```
+
+### 2. Server Access
+```bash
+# Set up SSH key with proper permissions
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+touch ~/.ssh/do_deploy_key
+chmod 600 ~/.ssh/do_deploy_key
+```
+
+### 3. File Transfer
+```bash
+# Create application directory
+ssh -i ~/.ssh/do_deploy_key -o StrictHostKeyChecking=no root@143.244.164.33 'mkdir -p /var/www/ple'
+
+# Copy deployment package
+scp -i ~/.ssh/do_deploy_key php-backend.tar.gz root@143.244.164.33:/var/www/ple/
+```
+
+### 4. Server Configuration
 ```bash
 # Update package lists
 apt-get update
@@ -28,19 +54,23 @@ add-apt-repository -y ppa:ondrej/php
 apt-get install -y nginx php8.2-fpm php8.2-sqlite3 php8.2-mbstring php8.2-intl php8.2-xml php8.2-curl composer unzip
 ```
 
-### 2. Application Setup
+### 5. Application Setup
 ```bash
-# Create application directory
-mkdir -p /var/www/ple/php-backend/data
+# Extract application files
+cd /var/www/ple
+tar xzf php-backend.tar.gz
 
-# Set proper permissions
+# Install dependencies
+cd php-backend
+COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader
+
+# Set permissions
 chown -R www-data:www-data /var/www/ple
 chmod -R 755 /var/www/ple
 chmod -R 775 /var/www/ple/php-backend/data
 ```
 
-### 3. Nginx Configuration
-Create a new Nginx site configuration at `/etc/nginx/sites-available/ple`:
+### 6. Nginx Configuration
 ```nginx
 server {
     listen 80;
@@ -59,49 +89,45 @@ server {
 }
 ```
 
-Enable the site:
+Save to `/etc/nginx/sites-available/ple` and enable:
 ```bash
 ln -sf /etc/nginx/sites-available/ple /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
 systemctl restart nginx php8.2-fpm
 ```
 
-### 4. Application Deployment
-```bash
-# Copy application files
-cd /var/www/ple
-tar xzf php-backend.tar.gz
+### 7. Database Configuration
+- Location: `/var/www/ple/php-backend/data/ple.db`
+- Auto-created on first access
+- Permissions: 775 (www-data writable)
 
-# Install dependencies
-cd php-backend
-COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader
-
-# Set final permissions
-chown -R www-data:www-data /var/www/ple
-chmod -R 755 /var/www/ple
-chmod -R 775 /var/www/ple/php-backend/data
-```
-
-### 5. Database Setup
-The SQLite database will be automatically created in `/var/www/ple/php-backend/data/ple.db` when the application is first accessed. The directory permissions are set to allow the web server to create and modify the database file.
-
-### 6. Initial Access
-- Access the application at http://143.244.164.33
-- Default admin credentials:
+### 8. Access Information
+- URL: http://143.244.164.33
+- Default Login:
   - Username: admin
   - Password: admin
-  - **Important**: Change these credentials immediately after first login
+  - **Important**: Change immediately after first login
 
-### 7. Security Considerations
-1. Configure a firewall (UFW recommended)
-2. Set up SSL/TLS certificates
-3. Change default admin credentials
-4. Regularly update system packages
-5. Monitor log files in /var/log/nginx and /var/log/php
+### 9. Verification Steps
+1. Check Nginx status: `systemctl status nginx`
+2. Check PHP-FPM status: `systemctl status php8.2-fpm`
+3. Verify permissions: `ls -la /var/www/ple/php-backend/data`
+4. Test database access: `sudo -u www-data test -w /var/www/ple/php-backend/data/ple.db`
 
-### 8. Maintenance
-- Logs are located in:
-  - Nginx: `/var/log/nginx/`
-  - PHP-FPM: `/var/log/php8.2-fpm.log`
-  - Application: `/var/www/ple/php-backend/data/logs/`
-- Database backups should be taken from `/var/www/ple/php-backend/data/ple.db`
+### 10. Monitoring
+- Nginx logs: `/var/log/nginx/error.log`
+- PHP-FPM logs: `/var/log/php8.2-fpm.log`
+- Application logs: `/var/www/ple/php-backend/data/logs/`
+
+### 11. Backup Considerations
+- Database: `/var/www/ple/php-backend/data/ple.db`
+- Configuration: `/etc/nginx/sites-available/ple`
+- Application files: `/var/www/ple/php-backend/`
+
+### 12. Security Notes
+- Default admin credentials must be changed
+- Database directory permissions are 775
+- Application files are owned by www-data
+- SSL/TLS certificates pending setup
+- Configure firewall (UFW recommended)
+- Regular system package updates required
