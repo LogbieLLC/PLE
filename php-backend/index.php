@@ -17,9 +17,11 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/bootstrap.php';
+namespace PLEPHP\Web;
 
 use function PLEPHP\Web\handleRoute;
+
+require_once __DIR__ . '/bootstrap.php';
 
 // Execute routing
 handleRoute();
