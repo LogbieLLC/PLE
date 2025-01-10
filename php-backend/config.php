@@ -1,19 +1,28 @@
 <?php
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+declare(strict_types=1);
 
-require_once __DIR__ . '/vendor/autoload.php';
+namespace PLEPHP\Config;
 
 use RedBeanPHP\R as R;
 use RedBeanPHP\Logger as Logger;
 
-// Create a null logger to suppress query output
-class NullLogger implements Logger {
-    public function log() {
+/**
+ * Null logger implementation to suppress query output
+ */
+class NullLogger implements Logger
+{
+    public function log(): void
+    {
         // Do nothing
     }
 }
+
+// Initialize error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+
+require_once __DIR__ . '/vendor/autoload.php';
 
 // Ensure data directory exists with proper permissions
 $dataDir = __DIR__ . '/data';
@@ -64,18 +73,22 @@ try {
         \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
         \PDO::ATTR_EMULATE_PREPARES => false,
         \PDO::ATTR_STATEMENT_CLASS => ['PDOStatement'],
-        \PDO::ATTR_STRINGIFY_FETCHES => false
+        \PDO::ATTR_STRINGIFY_FETCHES => false,
     ]);
-    
+
     // Disable all RedBean debug features
-    define('REDBEAN_DISABLE_QUERY_COUNTER', true);
-    define('REDBEAN_INSPECT', false);
-    
+    if (!defined('REDBEAN_DISABLE_QUERY_COUNTER')) {
+        define('REDBEAN_DISABLE_QUERY_COUNTER', true);
+    }
+    if (!defined('REDBEAN_INSPECT')) {
+        define('REDBEAN_INSPECT', false);
+    }
+
     // Setup RedBean with configured PDO instance and no debug features
     R::setup($pdo);
     R::debug(false);
     R::getDatabaseAdapter()->getDatabase()->setEnableLogging(false);
-    
+
     // Set null logger to prevent query output
     R::getDatabaseAdapter()->getDatabase()->setLogger(new NullLogger());
 
