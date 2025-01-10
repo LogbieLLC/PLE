@@ -133,10 +133,10 @@ jobs:
           # Run analysis and capture output
           if vendor/bin/phpstan analyse --no-progress --error-format=github; then
             echo "✅ Static analysis passed with no errors"
-            echo "::set-output name=phpstan_status::success"
+            echo "phpstan_status=success" >> $GITHUB_OUTPUT
           else
             echo "❌ Static analysis found issues"
-            echo "::set-output name=phpstan_status::failure"
+            echo "phpstan_status=failure" >> $GITHUB_OUTPUT
             exit 1
           fi
           echo "::endgroup::"
