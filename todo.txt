@@ -1,0 +1,8 @@
+- [ ] GitHub Actions: Workflow not triggering on PR #5 - verify repository settings and permissions
+- [ ] GitHub Actions: Add debug logging to workflow steps for better visibility
+- [ ] GitHub Actions: Consider adding workflow_dispatch event for manual triggering
+- [x] PSR-12: Verify bootstrap.php follows PSR-12 standards for comment formatting and spacing
+- [x] PSR-12: Check for any side effects in bootstrap.php (require statements vs. class/function definitions)
+- [ ] PHPStan: Verify phpstan.neon configuration is properly formatted
+- [x] PHPStan: Ensure proper type hints in bootstrap.php for RedBeanPHP objects
+- [ ] CI: Ensure checks run in correct order (1. PHPCS auto-fix, 2. PHPCS Manual, 3. PHPStan)
