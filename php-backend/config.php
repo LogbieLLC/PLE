@@ -32,8 +32,29 @@ try {
         throw new \Exception("Database file is not writable");
     }
 
-    // Setup RedBean with SQLite
-    R::setup('sqlite:' . $dbfile);
+    // Verify database directory and file
+    if (!is_dir(dirname($dbfile))) {
+        if (!@mkdir(dirname($dbfile), 0777, true)) {
+            throw new \Exception("Failed to create database directory");
+        }
+    }
+
+    // Ensure database file exists and is writable
+    if (!file_exists($dbfile)) {
+        if (!@touch($dbfile)) {
+            throw new \Exception("Failed to create database file");
+        }
+        chmod($dbfile, 0666);
+    }
+
+    // Setup RedBean with SQLite using PDO format
+    $dsn = 'sqlite:' . $dbfile;
+    R::setup($dsn);
+
+    // Test connection immediately
+    if (!R::testConnection()) {
+        throw new \Exception("Failed to connect to database");
+    }
 
     // Enable debug mode in non-production
     if (!getenv('APP_ENV') || getenv('APP_ENV') !== 'production') {
