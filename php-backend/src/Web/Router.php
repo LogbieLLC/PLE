@@ -275,12 +275,14 @@ function handleRoute(): void
     }
 
     // Clean up any remaining database output buffer
-    if (ob_get_level() > 1) {
+    $bufferLevel = ob_get_level();
+    while ($bufferLevel > 1) {
         ob_end_clean();
+        $bufferLevel = ob_get_level();
     }
 
-    // Flush final output
-    if (ob_get_level() > 0) {
+    // Flush final output if we have exactly one buffer left
+    if ($bufferLevel === 1) {
         ob_end_flush();
     }
 }

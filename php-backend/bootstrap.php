@@ -6,6 +6,15 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 // Initialize database (with output buffering)
 use function PLEPHP\Config\initializeDatabase;
+
+// Clean any existing output buffers
+$bufferLevel = ob_get_level();
+while ($bufferLevel > 0) {
+    ob_end_clean();
+    $bufferLevel = ob_get_level();
+}
+
+// Start fresh output buffer
 ob_start();
 initializeDatabase();
 ob_end_clean();
