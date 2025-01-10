@@ -60,14 +60,14 @@ function initializeDatabase(): void
 
         // Start output buffering for all database operations
         ob_start();
-        
+
         // Setup RedBean with configured PDO instance and no debug features
         R::setup($pdo);
         R::debug(false);
 
         // Test connection and initialize admin user if needed
         $userCount = R::count('user');
-        
+
         if (!$userCount) {
             $admin = R::dispense('user');
             $admin->username = 'admin';
@@ -78,7 +78,7 @@ function initializeDatabase(): void
 
         // Test connection
         R::testConnection();
-        
+
         // Clear any SQL output
         ob_end_clean();
     } catch (\Exception $e) {
