@@ -15,7 +15,7 @@ function handleRoute(): void
 {
     // Start output buffering for all database operations
     ob_start();
-    
+
     $action = $_GET['action'] ?? 'home';
     $method = $_SERVER['REQUEST_METHOD'];
 
@@ -117,14 +117,14 @@ function handleRoute(): void
                 requireAuth();
                 // Start output buffering for database operations
                 ob_start();
-                
+
                 // Get all equipment and checklists for inspection view
                 $equipment = R::findAll('equipment', ' ORDER BY ple_id');
                 $checklists = R::findAll('checklist', ' ORDER BY date_inspected DESC, time_inspected DESC LIMIT 50');
-                
+
                 // Clear any SQL output before rendering
                 ob_clean();
-                
+
                 echo $GLOBALS['twig']->render('inspections.twig', [
                     'equipment' => $equipment,
                     'checklists' => $checklists
@@ -211,7 +211,7 @@ function handleRoute(): void
             case 'login':
                 // Start output buffering for login operations
                 ob_start();
-                
+
                 if ($method === 'POST') {
                     $username = $_POST['username'] ?? '';
                     $password = $_POST['password'] ?? '';
@@ -258,7 +258,7 @@ function handleRoute(): void
         ob_clean();
         echo $GLOBALS['twig']->render('error.twig', ['message' => $e->getMessage()]);
     }
-    
+
     // End output buffering
     ob_end_flush();
 }
