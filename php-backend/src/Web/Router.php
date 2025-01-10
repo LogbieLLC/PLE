@@ -148,8 +148,9 @@ function handleRoute(): void
                 if ($method === 'POST') {
                     // Validate inspection time (12:00 AM - 7:00 AM)
                     $currentHour = (int)date('G');
+                    $currentTime = date('g:i A');
                     if ($currentHour >= 7) {
-                        throw new \Exception("Inspections can only be performed between 12:00 AM and 7:00 AM");
+                        throw new \Exception("Inspections can only be performed between 12:00 AM and 7:00 AM. Current time: {$currentTime}");
                     }
 
                     // Check for concurrent inspections
