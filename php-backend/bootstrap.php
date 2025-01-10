@@ -23,18 +23,20 @@ if (!\RedBeanPHP\R::testConnection()) {
 
 // Initialize users table if needed
 ob_start();
-$userCount = \RedBeanPHP\R::count('user');
-ob_end_clean();
-
-if (!$userCount) {
-    // Create temporary admin user for testing
-    // TODO: Remove or change credentials before deploying to production
-    $admin = \RedBeanPHP\R::dispense('user');
-    $admin->username = 'admin';
-    $admin->password = password_hash('admin', PASSWORD_DEFAULT);
-    $admin->role = 'admin';
-    ob_start();
-    \RedBeanPHP\R::store($admin);
+try {
+    $userCount = \RedBeanPHP\R::count('user');
+    
+    if (!$userCount) {
+        // Create temporary admin user for testing
+        // TODO: Remove or change credentials before deploying to production
+        $admin = \RedBeanPHP\R::dispense('user');
+        $admin->username = 'admin';
+        $admin->password = password_hash('admin', PASSWORD_DEFAULT);
+        $admin->role = 'admin';
+        \RedBeanPHP\R::store($admin);
+    }
+} finally {
+    // Always clean the buffer regardless of success or failure
     ob_end_clean();
 }
 
