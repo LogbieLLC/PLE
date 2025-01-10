@@ -16,7 +16,8 @@
       "PLEPHP\\": "src/"
     },
     "files": [
-      "src/Config/Models.php"
+      "src/Config/Models.php",
+      "src/Auth.php"
     ]
   },
   "config": {
