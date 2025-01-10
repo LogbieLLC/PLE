@@ -9,22 +9,20 @@ use function PLEPHP\Config\initializeDatabase;
 
 // Clean any existing output buffers
 // Clean any existing output buffers
-$level = ob_get_level();
 try {
-    while ($level > 0) {
+    while (ob_get_level() !== 0) {
         if (!@ob_end_clean()) {
             throw new \RuntimeException('Failed to clean output buffer');
         }
-        $level--;
     }
     // Start fresh output buffer
     if (!@ob_start()) {
         throw new \RuntimeException('Failed to start output buffer');
     }
-} catch (\Exception $e) {
-    error_log('Buffer cleanup failed: ' . $e->getMessage());
+} catch (\Exception $bufferException) {
+    error_log('Buffer cleanup failed: ' . $bufferException->getMessage());
     // Ensure clean state
-    while (ob_get_level() > 0) {
+    while (ob_get_level() !== 0) {
         @ob_end_clean();
     }
 }
