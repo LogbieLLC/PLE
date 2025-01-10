@@ -17,6 +17,38 @@
         </header>
 
         <main>
+            {% if previousLock %}
+                <div class="alert alert-warning mb-4">
+                    <h4 class="alert-heading">Inspection Control Changed</h4>
+                    <p>
+                        Your inspection of equipment {{ previousLock.ple_id }} was taken over by another user
+                        at {{ previousLock.force_taken_at|date('g:i A') }}.
+                    </p>
+                </div>
+            {% endif %}
+
+            {% if currentLock %}
+                <div class="alert {% if currentLock.force_taken_by %}alert-warning{% else %}alert-info{% endif %} mb-4">
+                    <h4 class="alert-heading">Inspection Lock Status</h4>
+                    <p>
+                        This equipment is currently being inspected by {{ currentLock.inspector_id }}
+                        since {{ currentLock.created|date('g:i A') }}.
+                        {% if currentLock.force_taken_by %}
+                            <br>
+                            <small class="text-muted">
+                                Control was taken by admin at {{ currentLock.force_taken_at|date('g:i A') }}
+                            </small>
+                        {% endif %}
+                    </p>
+                    {% if user.role == 'admin' or currentLock.created < date('-30 minutes')|date('Y-m-d H:i:s') %}
+                        <hr>
+                        <p class="mb-0">
+                            <a href="index.php?action=takeOverInspection&pleId={{ currentLock.ple_id }}" 
+                               class="btn btn-warning">Take Control of Inspection</a>
+                        </p>
+                    {% endif %}
+                </div>
+            {% endif %}
             <form method="POST" action="index.php?action=addInspection" class="col-md-8 mx-auto">
                 <div class="mb-3">
                     <label for="ple_id" class="form-label">Equipment:</label>
