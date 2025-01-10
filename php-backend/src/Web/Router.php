@@ -148,9 +148,15 @@ function handleRoute(): void
                 requireAuth();
                 if ($method === 'POST') {
                     // Validate inspection time (12:00 AM - 7:00 AM)
-                    $currentHour = (int)date('G');
-                    if ($currentHour >= 7) {
-                        throw new \Exception("Inspections can only be performed between 12:00 AM and 7:00 AM");
+                    // Skip time restriction if debug mode is enabled
+                    if (!($GLOBALS['PLE_DEBUG'] ?? false)) {
+                        $currentHour = (int)date('G');
+                        if ($currentHour >= 7) {
+                            throw new \Exception(sprintf(
+                                "Inspections can only be performed between 12:00 AM and 7:00 AM (current time: %s)",
+                                date('g:i A T')
+                            ));
+                        }
                     }
 
                     // Check for concurrent inspections

@@ -80,6 +80,13 @@ $GLOBALS['twig'] = new \Twig\Environment($loader, [
 // Set timezone to UTC-6 (Chicago)
 date_default_timezone_set('America/Chicago');
 
+// Set debug mode from environment variable
+$debugMode = getenv('PLE_DEBUG') === 'true';
+
 // Add global variables to Twig
 $GLOBALS['twig']->addGlobal('user', $_SESSION['user'] ?? null);
 $GLOBALS['twig']->addGlobal('currentTime', date('g:i A T'));
+$GLOBALS['twig']->addGlobal('debugMode', $debugMode);
+
+// Store debug mode in global scope for router access
+$GLOBALS['PLE_DEBUG'] = $debugMode;
