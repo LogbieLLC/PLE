@@ -58,17 +58,17 @@ function initializeDatabase(): void
             define('REDBEAN_INSPECT', false);
         }
 
+        // Start output buffering for all database operations
+        ob_start();
+        
         // Setup RedBean with configured PDO instance and no debug features
         R::setup($pdo);
         R::debug(false);
 
-        // Configure logging using RedBean's debug mode
-        // Note: RedBean doesn't support direct logger configuration,
-        // so we use debug mode to control output
-        R::debug(false);
-
-        // Initialize admin user if not exists
-        if (!R::count('user')) {
+        // Test connection and initialize admin user if needed
+        $userCount = R::count('user');
+        
+        if (!$userCount) {
             $admin = R::dispense('user');
             $admin->username = 'admin';
             $admin->password = password_hash('admin', PASSWORD_DEFAULT);
@@ -78,6 +78,9 @@ function initializeDatabase(): void
 
         // Test connection
         R::testConnection();
+        
+        // Clear any SQL output
+        ob_end_clean();
     } catch (\Exception $e) {
         error_log('Database setup failed: ' . $e->getMessage());
         throw new \Exception('Database setup failed: ' . $e->getMessage());

@@ -2,19 +2,15 @@
 
 declare(strict_types=1);
 
-// Start output buffering at the very beginning
-ob_start();
-
 require_once __DIR__ . '/vendor/autoload.php';
 
-// Initialize database
+// Initialize database (with output buffering)
 use function PLEPHP\Config\initializeDatabase;
+ob_start();
 initializeDatabase();
+ob_end_clean();
 
 use function PLEPHP\Config\configureModels;
-
-// Clear any initial output
-ob_clean();
 
 // Initialize core components
 session_start();
