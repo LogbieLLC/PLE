@@ -8,15 +8,26 @@ require_once __DIR__ . '/vendor/autoload.php';
 use function PLEPHP\Config\initializeDatabase;
 
 // Clean any existing output buffers
+// Clean any existing output buffers
+$level = ob_get_level();
 try {
-    while (ob_get_level()) {
-        ob_end_clean();
+    while ($level > 0) {
+        if (!@ob_end_clean()) {
+            throw new \RuntimeException('Failed to clean output buffer');
+        }
+        $level--;
+    }
+    // Start fresh output buffer
+    if (!@ob_start()) {
+        throw new \RuntimeException('Failed to start output buffer');
     }
 } catch (\Exception $e) {
     error_log('Buffer cleanup failed: ' . $e->getMessage());
+    // Ensure clean state
+    while (ob_get_level() > 0) {
+        @ob_end_clean();
+    }
 }
-
-// Start fresh output buffer
 ob_start();
 initializeDatabase();
 ob_end_clean();
