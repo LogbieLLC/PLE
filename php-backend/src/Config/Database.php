@@ -61,7 +61,7 @@ function initializeDatabase(): void
         // Setup RedBean with configured PDO instance and no debug features
         R::setup($pdo);
         R::debug(false);
-        
+
         // Configure logging using RedBean's debug mode
         // Note: RedBean doesn't support direct logger configuration,
         // so we use debug mode to control output
