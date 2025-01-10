@@ -275,13 +275,19 @@ function handleRoute(): void
     }
 
     // Clean up any remaining database output buffer
-    while (ob_get_level() >= 2) {
-        ob_end_clean();
-    }
-
-    // Flush final output if we have exactly one buffer left
-    $finalLevel = ob_get_level();
-    if ($finalLevel >= 1) {
+    try {
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
+        // Start a new buffer for final output
+        ob_start();
+        echo $GLOBALS['twig']->render('error.twig', ['message' => $e->getMessage()]);
         ob_end_flush();
+    } catch (\Exception $e) {
+        // If buffer operations fail, ensure we don't leave any hanging
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
+        error_log('Buffer cleanup failed: ' . $e->getMessage());
     }
 }
