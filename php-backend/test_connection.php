@@ -25,9 +25,7 @@ try {
 
         // Test inspection lock model
         $lock = \RedBeanPHP\R::dispense('inspection_lock');
-        if (!$lock) {
-            throw new \Exception("Failed to create inspection_lock model");
-        }
+        // RedBean always returns a bean, no need to check
         echo "Inspection lock model OK\n";
 
         // Test model properties

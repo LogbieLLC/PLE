@@ -120,9 +120,7 @@ function initializeDatabase(): void
 
                 // Create and verify table
                 $bean = R::dispense($table);
-                if (!$bean) {
-                    throw new \Exception("Failed to create $table model");
-                }
+                // RedBean always returns a bean, no need to check
 
                 // Add test data
                 switch ($table) {

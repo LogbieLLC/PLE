@@ -6,6 +6,7 @@ namespace PLEPHP\Web;
 
 use RedBeanPHP\R;
 use PLEPHP\Model\InspectionLock;
+
 use function PLEPHP\requireAuth;
 
 /**
