@@ -13,6 +13,21 @@ use function PLEPHP\requireAuth;
  */
 function handleRoute(): void
 {
+    // Clean any existing buffers and start fresh
+    while (true) {
+        $level = ob_get_level();
+        if ($level <= 0) {
+            break;
+        }
+        @ob_end_clean();
+    }
+
+    // Start fresh output buffer for all operations
+    @ob_start();
+
+    // Wrap all database operations in a nested buffer
+    @ob_start();
+
     $action = $_GET['action'] ?? 'home';
     $method = $_SERVER['REQUEST_METHOD'];
 
@@ -22,6 +37,8 @@ function handleRoute(): void
                 requireAuth();
                 // Show equipment list
                 $equipment = R::findAll('equipment', ' ORDER BY ple_id');
+                // Clear any SQL output before rendering
+                ob_clean();
                 echo $GLOBALS['twig']->render('home.twig', ['equipment' => $equipment]);
                 break;
 
@@ -110,9 +127,20 @@ function handleRoute(): void
 
             case 'inspections':
                 requireAuth();
-                // Get all equipment for inspection selection
+                // Start output buffering for database operations
+                ob_start();
+
+                // Get all equipment and checklists for inspection view
                 $equipment = R::findAll('equipment', ' ORDER BY ple_id');
-                echo $GLOBALS['twig']->render('inspections.twig', ['equipment' => $equipment]);
+                $checklists = R::findAll('checklist', ' ORDER BY date_inspected DESC, time_inspected DESC LIMIT 50');
+
+                // Clear any SQL output before rendering
+                ob_clean();
+
+                echo $GLOBALS['twig']->render('inspections.twig', [
+                    'equipment' => $equipment,
+                    'checklists' => $checklists
+                ]);
                 break;
 
             case 'addInspection':
@@ -193,6 +221,9 @@ function handleRoute(): void
                 break;
 
             case 'login':
+                // Start output buffering for login operations
+                ob_start();
+
                 if ($method === 'POST') {
                     $username = $_POST['username'] ?? '';
                     $password = $_POST['password'] ?? '';
@@ -205,15 +236,18 @@ function handleRoute(): void
                             'username' => $user->username,
                             'role' => $user->role
                         ];
+                        ob_end_clean(); // Clear buffer before redirect
                         header('Location: index.php');
                         exit;
                     }
 
                     $error = "Invalid username or password";
+                    ob_clean(); // Clear SQL output
                     echo $GLOBALS['twig']->render('login.twig', ['error' => $error]);
                     break;
                 }
 
+                ob_clean(); // Clear any SQL output
                 echo $GLOBALS['twig']->render('login.twig');
                 break;
 
@@ -224,12 +258,26 @@ function handleRoute(): void
 
             default:
                 http_response_code(404);
+                // Clear any SQL output before rendering
+                ob_clean();
                 echo $GLOBALS['twig']->render('404.twig');
                 break;
         }
     } catch (\Exception $e) {
         error_log($e->getMessage());
         http_response_code(500);
-        echo $GLOBALS['twig']->render('error.twig', ['message' => $e->getMessage()]);
+        $errorMessage = $e->getMessage();
+
+        // Clean all output buffers
+        while (true) {
+            $level = ob_get_level();
+            if ($level <= 0) {
+                break;
+            }
+            @ob_end_clean();
+        }
+
+        // Render error page directly
+        echo $GLOBALS['twig']->render('error.twig', ['message' => $errorMessage]);
     }
 }
