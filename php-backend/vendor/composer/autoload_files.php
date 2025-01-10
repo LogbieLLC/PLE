@@ -16,4 +16,5 @@ return array(
     'c7baa00073ee9c61edf148c51917cfb4' => $vendorDir . '/twig/twig/src/Resources/escaper.php',
     'f844ccf1d25df8663951193c3fc307c8' => $vendorDir . '/twig/twig/src/Resources/string_loader.php',
     '5a19e2fbb8c770548f9311886fa7e032' => $baseDir . '/src/Config/Models.php',
+    '373ce31d45b457b9857497bec12ec3af' => $baseDir . '/src/Auth.php',
 );
