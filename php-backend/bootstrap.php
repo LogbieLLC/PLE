@@ -5,26 +5,18 @@ declare(strict_types=1);
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config.php';
 
-// Configure RedBean model namespace
-\RedBeanPHP\R::ext('equipment', function ($bean) {
-    $model = new \PLEPHP\Model\Equipment();
-    $model->loadBean($bean);
-    return $model;
-});
+use function PLEPHP\Config\configureModels;
 
-\RedBeanPHP\R::ext('checklist', function ($bean) {
-    $model = new \PLEPHP\Model\Checklist();
-    $model->loadBean($bean);
-    return $model;
-});
-
+// Initialize core components
 session_start();
+configureModels();
 
-// Initialize users table if needed
+// Verify database connection
 if (!\RedBeanPHP\R::testConnection()) {
     die('Database connection failed');
 }
 
+// Initialize users table if needed
 if (!\RedBeanPHP\R::count('user')) {
     // Create temporary admin user for testing
     // TODO: Remove or change credentials before deploying to production
@@ -35,7 +27,7 @@ if (!\RedBeanPHP\R::count('user')) {
     \RedBeanPHP\R::store($admin);
 }
 
-// Setup Twig
+// Setup Twig environment
 $loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/templates');
 $GLOBALS['twig'] = new \Twig\Environment($loader, [
     'cache' => __DIR__ . '/cache',

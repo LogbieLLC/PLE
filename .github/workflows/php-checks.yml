@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [ main ]
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        description: 'Run the workflow with debug logging'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -71,25 +78,44 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          echo "::group::Running PHP CodeSniffer Auto-Fix"
+          echo "Attempting to automatically fix PSR-12 coding standard violations..."
           vendor/bin/phpcbf --standard=PSR12 --ignore=vendor/*,cache/* ./ || true
+          
           if [[ -n $(git status --porcelain) ]]; then
+            echo "Changes detected - committing fixes..."
             git config --global user.email "devin@logbie.com"
             git config --global user.name "Devin AI"
             git add .
             git commit -m "style: auto-fix code style issues"
             git push
+            echo "Auto-fixes committed and pushed successfully"
+          else
+            echo "No auto-fixable issues found"
           fi
+          echo "::endgroup::"
 
       # Step 2: PHPCS Manual Check
       - name: Run PHPCS Manual Check
         run: |
-          echo "Running PHPCS Manual Check..."
-          vendor/bin/phpcs --standard=PSR12 --report=full --colors --ignore=vendor/*,cache/* ./
+          echo "::group::Running PHP CodeSniffer Manual Check"
+          echo "Checking PSR-12 coding standards compliance..."
+          if vendor/bin/phpcs --standard=PSR12 --report=full --colors --ignore=vendor/*,cache/* ./; then
+            echo "✅ All files comply with PSR-12 coding standards"
+          else
+            echo "❌ Some files do not comply with PSR-12 coding standards"
+            exit 1
+          fi
+          echo "::endgroup::"
 
       # Step 3: PHPStan Static Analysis
       - name: Run PHPStan
         run: |
-          echo "Running PHPStan Analysis..."
+          echo "::group::Running PHPStan Static Analysis"
+          echo "Analyzing code with PHPStan level 5..."
+          echo "Configuring PHPStan with level 5 analysis..."
+          
+          # Create PHPStan configuration
           echo "parameters:
             level: 5
             paths:
@@ -103,4 +129,39 @@ jobs:
               - RedBeanPHP\OODBBean
               - PLEPHP\Model\Equipment
               - PLEPHP\Model\Checklist" > phpstan.neon
-          vendor/bin/phpstan analyse --no-progress
+          
+          # Run analysis and capture output
+          if vendor/bin/phpstan analyse --no-progress --error-format=github; then
+            echo "✅ Static analysis passed with no errors"
+            echo "::set-output name=phpstan_status::success"
+          else
+            echo "❌ Static analysis found issues"
+            echo "::set-output name=phpstan_status::failure"
+            exit 1
+          fi
+          echo "::endgroup::"
+
+      - name: Generate Job Summary
+        if: always()
+        run: |
+          echo "# PHP Quality Check Results" >> $GITHUB_STEP_SUMMARY
+          echo "## PHPCS Auto-Fix" >> $GITHUB_STEP_SUMMARY
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "✅ Auto-fixes applied and committed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ No auto-fixable issues found" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "## PHPCS Manual Check" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ job.status }}" == "success" ]]; then
+            echo "✅ All files comply with PSR-12" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Some files do not comply with PSR-12" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "## PHPStan Analysis" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ steps.phpstan.outputs.phpstan_status }}" == "success" ]]; then
+            echo "✅ No static analysis issues found" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Static analysis found issues" >> $GITHUB_STEP_SUMMARY
+          fi
