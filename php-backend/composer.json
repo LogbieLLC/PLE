@@ -14,7 +14,10 @@
   "autoload": {
     "psr-4": {
       "PLEPHP\\": "src/"
-    }
+    },
+    "files": [
+      "src/Config/Models.php"
+    ]
   },
   "config": {
     "sort-packages": true,
