@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PLEPHP\Web;
 
 use RedBeanPHP\R;
+
 use function PLEPHP\requireAuth;
 
 /**
