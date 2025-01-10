@@ -61,10 +61,11 @@ function initializeDatabase(): void
         // Setup RedBean with configured PDO instance and no debug features
         R::setup($pdo);
         R::debug(false);
-        R::getDatabaseAdapter()->getDatabase()->setEnableLogging(false);
-
-        // Set null logger to prevent query output
-        R::getDatabaseAdapter()->getDatabase()->setLogger(new NullLogger());
+        
+        // Configure logging using RedBean's debug mode
+        // Note: RedBean doesn't support direct logger configuration,
+        // so we use debug mode to control output
+        R::debug(false);
 
         // Initialize admin user if not exists
         if (!R::count('user')) {
