@@ -110,9 +110,13 @@ function handleRoute(): void
 
             case 'inspections':
                 requireAuth();
-                // Get all equipment for inspection selection
+                // Get all equipment and checklists for inspection view
                 $equipment = R::findAll('equipment', ' ORDER BY ple_id');
-                echo $GLOBALS['twig']->render('inspections.twig', ['equipment' => $equipment]);
+                $checklists = R::findAll('checklist', ' ORDER BY date_inspected DESC, time_inspected DESC LIMIT 50');
+                echo $GLOBALS['twig']->render('inspections.twig', [
+                    'equipment' => $equipment,
+                    'checklists' => $checklists
+                ]);
                 break;
 
             case 'addInspection':

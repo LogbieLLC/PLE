@@ -21,8 +21,7 @@
         <main>
             <section class="inspections-list">
                 <h2>Recent Inspections</h2>
-                {% set checklists = R.findAll('checklist', ' ORDER BY date_inspected DESC, time_inspected DESC LIMIT 50') %}
-                {% if checklists|length > 0 %}
+                {% if checklists is defined and checklists|length > 0 %}
                     <table>
                         <thead>
                             <tr>

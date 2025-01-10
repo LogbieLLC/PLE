@@ -6,6 +6,14 @@ ini_set('display_errors', 1);
 require_once __DIR__ . '/vendor/autoload.php';
 
 use RedBeanPHP\R as R;
+use RedBeanPHP\Logger as Logger;
+
+// Create a null logger to suppress query output
+class NullLogger implements Logger {
+    public function log() {
+        // Do nothing
+    }
+}
 
 // Ensure data directory exists with proper permissions
 $dataDir = __DIR__ . '/data';
@@ -47,20 +55,45 @@ try {
         chmod($dbfile, 0666);
     }
 
-    // Setup RedBean with SQLite using PDO format
+    // Setup RedBean with SQLite using PDO format with disabled logging
     $dsn = 'sqlite:' . $dbfile;
-    R::setup($dsn);
+    
+    // Create PDO instance with logging disabled
+    $pdo = new \PDO($dsn, null, null, [
+        \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+        \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+        \PDO::ATTR_EMULATE_PREPARES => false,
+        \PDO::ATTR_STATEMENT_CLASS => ['PDOStatement'],
+        \PDO::ATTR_STRINGIFY_FETCHES => false
+    ]);
+    
+    // Disable all RedBean debug features
+    define('REDBEAN_DISABLE_QUERY_COUNTER', true);
+    define('REDBEAN_INSPECT', false);
+    
+    // Setup RedBean with configured PDO instance and no debug features
+    R::setup($pdo);
+    R::debug(false);
+    R::getDatabaseAdapter()->getDatabase()->setEnableLogging(false);
+    
+    // Set null logger to prevent query output
+    R::getDatabaseAdapter()->getDatabase()->setLogger(new NullLogger());
 
+    // Buffer all database operations
+    ob_start();
+    
     // Test connection immediately
     if (!R::testConnection()) {
+        ob_end_clean();
         throw new \Exception("Failed to connect to database");
     }
 
-    // Enable debug mode in non-production
-    if (!getenv('APP_ENV') || getenv('APP_ENV') !== 'production') {
-        R::debug(true);
-    }
-
+    // Debug mode is disabled by default
+    R::debug(false);
+    
+    // Clear any buffered output
+    ob_end_clean();
+    
     // Initialize admin user if not exists
     if (!R::count('user')) {
         $admin = R::dispense('user');
