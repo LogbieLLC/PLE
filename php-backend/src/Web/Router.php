@@ -13,9 +13,17 @@ use function PLEPHP\requireAuth;
  */
 function handleRoute(): void
 {
-    // Start output buffering for all database operations
+    // Ensure clean output buffer at the start
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    
+    // Start fresh output buffer for all operations
     ob_start();
 
+    // Wrap all database operations in a nested buffer
+    ob_start();
+    
     $action = $_GET['action'] ?? 'home';
     $method = $_SERVER['REQUEST_METHOD'];
 
@@ -254,11 +262,25 @@ function handleRoute(): void
     } catch (\Exception $e) {
         error_log($e->getMessage());
         http_response_code(500);
-        // Clear any SQL output before rendering error page
-        ob_clean();
+        
+        // Clean all output buffers
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+        
+        // Start fresh buffer for error page
+        ob_start();
         echo $GLOBALS['twig']->render('error.twig', ['message' => $e->getMessage()]);
+        ob_end_flush();
     }
 
-    // End output buffering
-    ob_end_flush();
+    // Clean up any remaining database output buffer
+    if (ob_get_level() > 1) {
+        ob_end_clean();
+    }
+
+    // Flush final output
+    if (ob_get_level() > 0) {
+        ob_end_flush();
+    }
 }
