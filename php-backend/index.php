@@ -8,8 +8,6 @@ use RedBeanPHP\R;
 
 use function PLEPHP\requireAuth;
 
-require_once __DIR__ . '/bootstrap.php';
-
 /**
  * Handle the main routing logic for the application
  */
