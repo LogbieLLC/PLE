@@ -13,6 +13,16 @@ on:
       - 'php-backend/**'
       - '.github/workflows/php-checks.yml'
 
+permissions:
+  contents: write
+  pull-requests: write
+  checks: write
+
+# Limit concurrent runs of this workflow
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   php-quality:
     name: PHP Quality Checks
@@ -21,8 +31,12 @@ jobs:
       run:
         working-directory: ./php-backend
 
+    # Ensure consistent working directory
     env:
       working-directory: ./php-backend
+      COMPOSER_PROCESS_TIMEOUT: 0
+      COMPOSER_NO_INTERACTION: 1
+      COMPOSER_NO_AUDIT: 1
 
     steps:
       - uses: actions/checkout@v3
