@@ -21,8 +21,8 @@ function initializeDatabase(): void
 
     // Ensure data directory exists with proper permissions
     $dataDir = __DIR__ . '/../../data';
-    if (!is_dir($dataDir)) {
-        if (!@mkdir($dataDir, 0777, true)) {
+    if (is_dir($dataDir) === false) {
+        if (@mkdir($dataDir, 0777, true) === false) {
             throw new \Exception("Failed to create data directory");
         }
         chmod($dataDir, 0777);
@@ -33,14 +33,14 @@ function initializeDatabase(): void
 
     try {
         // Ensure database file exists and is writable
-        if (!file_exists($dbfile)) {
-            if (!@touch($dbfile)) {
+        if (file_exists($dbfile) === false) {
+            if (@touch($dbfile) === false) {
                 throw new \Exception("Failed to create database file");
             }
             chmod($dbfile, 0666);
         }
 
-        if (!is_writable($dbfile)) {
+        if (is_writable($dbfile) === false) {
             throw new \Exception("Database file is not writable");
         }
 
@@ -55,10 +55,10 @@ function initializeDatabase(): void
         ]);
 
         // Disable all RedBean debug features
-        if (!defined('REDBEAN_DISABLE_QUERY_COUNTER')) {
+        if (defined('REDBEAN_DISABLE_QUERY_COUNTER') === false) {
             define('REDBEAN_DISABLE_QUERY_COUNTER', true);
         }
-        if (!defined('REDBEAN_INSPECT')) {
+        if (defined('REDBEAN_INSPECT') === false) {
             define('REDBEAN_INSPECT', false);
         }
 
@@ -127,7 +127,7 @@ function initializeDatabase(): void
                 error_log("Step 2: Successfully dispensed bean for: $table");
 
                 // Verify bean structure
-                if ($bean === null || !isset($bean->id)) {
+                if ($bean instanceof \RedBeanPHP\OODBBean === false || isset($bean->id) === false) {
                     throw new \Exception("Failed to create valid bean for: $table");
                 }
 
