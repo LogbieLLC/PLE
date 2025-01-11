@@ -88,5 +88,4 @@ function initializeDatabase(): void
     } finally {
         // Clear any SQL output
         ob_end_clean();
-    }
 }
