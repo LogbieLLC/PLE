@@ -77,17 +77,16 @@ function initializeDatabase(): void
 
         error_log('Database connection established successfully');
 
-            // Final connection test
-            if (!R::testConnection()) {
-                throw new \Exception('Database connection test failed');
-            }
-            error_log('Database connection verified');
-        } catch (\Exception $e) {
-            error_log('Database setup failed: ' . $e->getMessage());
-            throw new \Exception('Database setup failed: ' . $e->getMessage());
-        } finally {
-            // Clear any SQL output
-            ob_end_clean();
+        // Final connection test
+        if (!R::testConnection()) {
+            throw new \Exception('Database connection test failed');
         }
+        error_log('Database connection verified');
+    } catch (\Exception $e) {
+        error_log('Database setup failed: ' . $e->getMessage());
+        throw new \Exception('Database setup failed: ' . $e->getMessage());
+    } finally {
+        // Clear any SQL output
+        ob_end_clean();
     }
 }
