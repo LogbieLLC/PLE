@@ -65,23 +65,37 @@ function initializeDatabase(): void
         // Start output buffering for all database operations
         ob_start();
 
-        error_log('Setting up database and registering models...');
+        error_log('Starting database initialization with detailed logging...');
 
         // Setup RedBean with configured PDO instance first
         R::setup($pdo);
-        R::debug(false);
+        R::debug(true); // Enable debug temporarily
         R::freeze(false); // Allow schema modifications
 
+        error_log('Pre-registering model types with verification...');
+
         // Pre-register model types to ensure they exist
-        foreach (['equipment', 'checklist', 'inspection_lock', 'settings'] as $type) {
+        foreach (['user', 'equipment', 'checklist', 'inspection_lock', 'settings'] as $type) {
             try {
+                error_log("Step 1: Attempting to pre-register model type: $type");
                 // Create a test bean to register the type
                 $bean = R::dispense($type);
-                R::store($bean);
+                error_log("Step 2: Successfully dispensed bean for type: $type");
+                
+                $id = R::store($bean);
+                error_log("Step 3: Successfully stored test bean for $type with ID: $id");
+                
+                // Verify the type exists in RedBean's schema
+                if (!R::inspect($type)) {
+                    throw new \Exception("Type verification failed after storage: $type");
+                }
+                error_log("Step 4: Verified type $type exists in schema");
+                
                 R::trash($bean);
-                error_log("Pre-registered model type: $type");
+                error_log("Step 5: Successfully cleaned up test bean for: $type");
             } catch (\Exception $e) {
-                error_log("Failed to pre-register model type $type: " . $e->getMessage());
+                error_log("CRITICAL ERROR: Failed to pre-register model type $type: " . $e->getMessage());
+                error_log("Stack trace: " . $e->getTraceAsString());
                 throw $e;
             }
         }
