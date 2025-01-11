@@ -47,23 +47,79 @@ try {
     // Configure models after database reset
     configureModels();
 
-    // Initialize core tables
-    if (!R::count('user')) {
-        // Create temporary admin user for testing
-        $admin = R::dispense('user');
-        $admin->username = 'admin';
-        $admin->password = password_hash('admin', PASSWORD_DEFAULT);
-        $admin->role = 'admin';
-        R::store($admin);
-    }
+    error_log('Initializing database tables...');
 
-    // Verify all required tables exist
-    foreach (['user', 'equipment', 'checklist', 'inspection_lock'] as $table) {
-        if (!R::inspect($table)) {
-            throw new \Exception("Required table '$table' does not exist");
+    // Initialize tables with test data
+    foreach (['user', 'equipment', 'checklist', 'inspection_lock', 'settings'] as $table) {
+        error_log("Creating table structure for: $table");
+        
+        // Create and verify table
+        $bean = R::dispense($table);
+        
+        // Add test data based on table type
+        switch ($table) {
+            case 'user':
+                // Create admin user if none exists
+                if (!R::count('user')) {
+                    $bean->username = 'admin';
+                    $bean->password = password_hash('admin', PASSWORD_DEFAULT);
+                    $bean->role = 'admin';
+                    R::store($bean);
+                    error_log('Admin user created');
+                }
+                break;
+                
+            case 'inspection_lock':
+                $bean->ple_id = 'TEST1';
+                $bean->inspector_id = 1;
+                $bean->created = date('Y-m-d H:i:s');
+                break;
+                
+            case 'equipment':
+                $bean->import([
+                    'ple_id' => 'TEST1',
+                    'ple_id_normalized' => 'TEST1',
+                    'type' => 'test',
+                    'make' => 'test',
+                    'model' => 'test',
+                    'serial_number' => 'test',
+                    'department' => 'test'
+                ]);
+                break;
+                
+            case 'checklist':
+                $bean->import([
+                    'ple_id' => 'TEST1',
+                    'date_inspected' => date('Y-m-d'),
+                    'time_inspected' => date('H:i:s'),
+                    'inspector_initials' => 'TST'
+                ]);
+                break;
+                
+            case 'settings':
+                $bean->import([
+                    'key' => 'debug_mode',
+                    'value' => '0'
+                ]);
+                break;
         }
+        
+        // Store test data to create table structure
+        R::store($bean);
+        
+        // Clean up test data (except admin user)
+        if ($table !== 'user') {
+            R::trash($bean);
+        }
+        
+        // Verify table exists
+        if (!R::inspect($table)) {
+            throw new \Exception("Failed to create table: $table");
+        }
+        error_log("Successfully initialized table: $table");
     }
-    error_log('All required tables verified');
+    
+    error_log('All tables initialized successfully');
 } catch (\Exception $e) {
     error_log('Database initialization failed: ' . $e->getMessage());
     throw $e;
