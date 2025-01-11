@@ -67,5 +67,9 @@ $GLOBALS['twig'] = new \Twig\Environment($loader, [
     'debug' => !getenv('APP_ENV') || getenv('APP_ENV') !== 'production'
 ]);
 
-// Add global user data to Twig
+// Set timezone to UTC-6 (Chicago)
+date_default_timezone_set('America/Chicago');
+
+// Add global variables to Twig
 $GLOBALS['twig']->addGlobal('user', $_SESSION['user'] ?? null);
+$GLOBALS['twig']->addGlobal('currentTime', date('g:i A T'));

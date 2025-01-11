@@ -15,7 +15,8 @@
                 <div class="container-fluid">
                     <div class="navbar-nav me-auto">
                         <a href="index.php?action=addEquipment" class="btn btn-primary me-2">Add New Equipment</a>
-                        <a href="index.php?action=inspections" class="btn btn-outline-secondary me-2">View Inspections</a>
+                        <a href="index.php?action=inspections" class="btn btn-outline-primary">View Inspections</a>
+
                     </div>
                     <div class="navbar-text">
                         Logged in as: {{ user.username }}
@@ -71,6 +72,7 @@
             </section>
         </main>
     </div>
+    {% include '_time.twig' %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
             crossorigin="anonymous"></script>

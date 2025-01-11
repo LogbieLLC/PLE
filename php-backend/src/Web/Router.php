@@ -218,7 +218,39 @@ function handleRoute(): void
                 }
 
                 $equipment = R::findAll('equipment', ' ORDER BY ple_id');
-                echo $GLOBALS['twig']->render('add_inspection.twig', ['equipment' => $equipment]);
+                
+                // Check for existing locks and notifications
+                $currentLock = null;
+                $previousLock = null;
+
+                // Check for specific equipment lock
+                if (isset($_GET['pleId'])) {
+                    $currentLock = R::findOne(
+                        'inspection_lock',
+                        ' ple_id = ? AND created > ? ',
+                        [
+                            $_GET['pleId'],
+                            date('Y-m-d H:i:s', strtotime('-30 minutes'))
+                        ]
+                    );
+                }
+
+                // Check for any locks that were taken from current user
+                $previousLock = R::findOne(
+                    'inspection_lock',
+                    ' inspector_id = ? AND force_taken_by IS NOT NULL AND force_taken_at > ? ',
+                    [
+                        $_SESSION['user']['id'],
+                        date('Y-m-d H:i:s', strtotime('-1 hour'))
+                    ]
+                );
+
+                echo $GLOBALS['twig']->render('add_inspection.twig', [
+                    'equipment' => $equipment,
+                    'currentLock' => $currentLock,
+                    'previousLock' => $previousLock,
+                    'selectedPleId' => $_GET['pleId'] ?? null
+                ]);
                 break;
 
             case 'login':
@@ -251,6 +283,49 @@ function handleRoute(): void
                 ob_clean(); // Clear any SQL output
                 echo $GLOBALS['twig']->render('login.twig');
                 break;
+
+            case 'takeOverInspection':
+                requireAuth();
+                
+                $pleId = $_GET['pleId'] ?? '';
+                if (!$pleId) {
+                    throw new \Exception("Equipment ID required");
+                }
+
+                // Check for existing lock
+                $existingLock = R::findOne(
+                    'inspection_lock',
+                    ' ple_id = ? AND created > ? ',
+                    [
+                        $pleId,
+                        date('Y-m-d H:i:s', strtotime('-30 minutes'))
+                    ]
+                );
+
+                if (!$existingLock) {
+                    throw new \Exception("No active inspection found");
+                }
+
+                // Check if user is admin or lock is expired
+                $isAdmin = ($_SESSION['user']['role'] ?? '') === 'admin';
+                $isExpired = strtotime($existingLock->created) < strtotime('-30 minutes');
+                
+                if (!$isAdmin && !$isExpired) {
+                    throw new \Exception("Cannot take control: inspection is still active");
+                }
+
+                // Take control of the inspection
+                if ($isAdmin) {
+                    $existingLock->force_taken_by = $_SESSION['user']['id'];
+                    $existingLock->force_taken_at = date('Y-m-d H:i:s');
+                }
+                $existingLock->inspector_id = $_SESSION['user']['id'];
+                $existingLock->created = date('Y-m-d H:i:s');
+                
+                R::store($existingLock);
+
+                header('Location: index.php?action=addInspection&pleId=' . urlencode($pleId));
+                exit;
 
             case 'logout':
                 session_destroy();
