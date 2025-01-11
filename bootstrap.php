@@ -11,19 +11,19 @@ use function PLEPHP\Config\configureModels;
 
 // Clean any existing output buffers
 try {
-    while (ob_get_level() !== 0) {
-        if (!@ob_end_clean()) {
+    while (ob_get_level() > 0) {
+        if (@ob_end_clean() === false) {
             throw new \RuntimeException('Failed to clean output buffer');
         }
     }
     // Start fresh output buffer
-    if (!@ob_start()) {
+    if (@ob_start() === false) {
         throw new \RuntimeException('Failed to start output buffer');
     }
 } catch (\Exception $bufferException) {
     error_log('Buffer cleanup failed: ' . $bufferException->getMessage());
     // Ensure clean state
-    while (ob_get_level() !== 0) {
+    while (ob_get_level() > 0) {
         @ob_end_clean();
     }
 }
@@ -40,7 +40,11 @@ try {
         throw new \Exception('Database connection failed');
     }
 
-    // Configure models after database is ready
+    // Reset database to clean state
+    R::nuke();
+    R::freeze(false);
+
+    // Configure models after database reset
     configureModels();
 
     // Initialize core tables

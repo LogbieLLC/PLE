@@ -16,10 +16,6 @@ use PLEPHP\Model\Settings;
 function configureModels(): void
 {
     try {
-        // Reset database to clean state and allow schema modifications
-        R::nuke();
-        R::freeze(false);
-
         // Register model extensions
         R::ext('equipment', function ($bean) {
             $model = new Equipment();
