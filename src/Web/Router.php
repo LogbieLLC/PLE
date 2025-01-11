@@ -347,6 +347,51 @@ function handleRoute(): void
                 header('Location: index.php?action=addInspection&pleId=' . urlencode($pleId));
                 exit;
 
+
+
+            case 'settings':
+                requireAuth();
+                
+                // Start output buffering for settings operations
+                ob_start();
+
+                // Verify admin role
+                if ($_SESSION['user']['role'] !== 'admin') {
+                    throw new \Exception("Access denied: Admin only");
+                }
+
+                if ($method === 'POST') {
+                    // Update debug mode setting
+                    $debugMode = isset($_POST['debug_mode']);
+                    $setting = R::findOne('settings', ' `key` = ? ', ['debug_mode']) ?? R::dispense('settings');
+                    $setting->key = 'debug_mode';
+                    $setting->value = $debugMode ? '1' : '0';
+                    R::store($setting);
+
+                    // Update global debug mode
+                    $GLOBALS['PLE_DEBUG'] = $debugMode;
+                    $GLOBALS['twig']->addGlobal('debugMode', $debugMode);
+                    
+                    // Clear buffer before redirect
+                    ob_end_clean();
+                    header('Location: index.php?action=settings');
+                    exit;
+                }
+
+                // Get current debug mode setting
+                $debugSetting = R::findOne('settings', ' `key` = ? ', ['debug_mode']);
+                $debugMode = ($debugSetting && $debugSetting->value === '1');
+
+                // Clear any SQL output before rendering
+                ob_clean();
+                
+                echo $GLOBALS['twig']->render('settings.twig', [
+                    'debugMode' => $debugMode,
+                    'isAdmin' => true,
+                    'user' => $_SESSION['user']
+                ]);
+                break;
+
             case 'logout':
                 session_destroy();
                 header('Location: index.php?action=login');

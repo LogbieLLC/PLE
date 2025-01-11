@@ -68,7 +68,9 @@ try {
 }
 
 // Initialize core components
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Setup Twig environment
 $loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/templates');
@@ -80,13 +82,16 @@ $GLOBALS['twig'] = new \Twig\Environment($loader, [
 // Set timezone to UTC-6 (Chicago)
 date_default_timezone_set('America/Chicago');
 
-// Set debug mode from environment variable
-$debugMode = getenv('PLE_DEBUG') === 'true';
+// Read debug mode from settings table with environment variable fallback
+$debugSetting = R::findOne('settings', ' `key` = ? ', ['debug_mode']);
+$debugMode = ($debugSetting && $debugSetting->value === '1') || getenv('PLE_DEBUG') === 'true';
 
 // Add global variables to Twig
-$GLOBALS['twig']->addGlobal('user', $_SESSION['user'] ?? null);
+$user = $_SESSION['user'] ?? null;
+$GLOBALS['twig']->addGlobal('user', $user);
 $GLOBALS['twig']->addGlobal('currentTime', date('g:i A T'));
 $GLOBALS['twig']->addGlobal('debugMode', $debugMode);
+$GLOBALS['twig']->addGlobal('isAdmin', ($user['role'] ?? '') === 'admin');
 
 // Store debug mode in global scope for router access
 $GLOBALS['PLE_DEBUG'] = $debugMode;

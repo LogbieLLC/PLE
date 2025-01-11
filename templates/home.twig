@@ -11,16 +11,18 @@
     <div class="container mt-4">
         <header class="mb-4">
             <h1 class="mb-3">Powered Lifting Equipment Management</h1>
-            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
                 <div class="container-fluid">
                     <div class="navbar-nav me-auto">
                         <a href="index.php?action=addEquipment" class="btn btn-primary me-2">Add New Equipment</a>
-                        <a href="index.php?action=inspections" class="btn btn-outline-primary">View Inspections</a>
-
+                        <a href="index.php?action=inspections" class="btn btn-outline-primary me-2">View Inspections</a>
+                        {% if isAdmin %}
+                            <a href="index.php?action=settings" class="btn btn-outline-primary me-2">Settings</a>
+                        {% endif %}
                     </div>
-                    <div class="navbar-text">
-                        Logged in as: {{ user.username }}
-                        <a href="index.php?action=logout" class="btn btn-outline-secondary ms-2">Logout</a>
+                    <div class="navbar-nav">
+                        <span class="navbar-text me-2">Logged in as: {{ user.username }} (Admin: {{ isAdmin ? 'Yes' : 'No' }})</span>
+                        <a href="index.php?action=logout" class="btn btn-outline-danger">Logout</a>
                     </div>
                 </div>
             </nav>

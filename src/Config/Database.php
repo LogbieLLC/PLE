@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace PLEPHP\Config;
 
 use RedBeanPHP\R;
+use PLEPHP\Model\Equipment;
+use PLEPHP\Model\Checklist;
+use PLEPHP\Model\InspectionLock;
+use PLEPHP\Model\Settings;
 
 /**
  * Initialize database connection and configuration
@@ -63,7 +67,14 @@ function initializeDatabase(): void
 
         error_log('Registering model extensions...');
 
-        // Register model extensions first
+        // Setup RedBean with configured PDO instance first
+        R::setup($pdo);
+        R::debug(false);
+        R::freeze(false); // Allow schema modifications
+
+        error_log('Registering model extensions...');
+
+        // Register model extensions
         R::ext('equipment', function ($bean) {
             $model = new \PLEPHP\Model\Equipment();
             $model->loadBean($bean);
@@ -82,40 +93,20 @@ function initializeDatabase(): void
             return $model;
         });
 
+        R::ext('settings', function ($bean) {
+            $model = new \PLEPHP\Model\Settings();
+            $model->loadBean($bean);
+            return $model;
+        });
+
         error_log('Model extensions registered');
 
-        // Setup RedBean with configured PDO instance
-        R::setup($pdo);
-        R::debug(false);
-        R::freeze(false); // Allow schema modifications
-
-        // Create base tables first
+        // Initialize tables
         try {
             error_log('Starting table initialization...');
 
-            // Register model extensions first
-            R::ext('equipment', function ($bean) {
-                $model = new \PLEPHP\Model\Equipment();
-                $model->loadBean($bean);
-                return $model;
-            });
-
-            R::ext('checklist', function ($bean) {
-                $model = new \PLEPHP\Model\Checklist();
-                $model->loadBean($bean);
-                return $model;
-            });
-
-            R::ext('inspection_lock', function ($bean) {
-                $model = new \PLEPHP\Model\InspectionLock();
-                $model->loadBean($bean);
-                return $model;
-            });
-
-            error_log('Model extensions registered');
-
             // Initialize core tables in dependency order
-            foreach (['user', 'equipment', 'checklist', 'inspection_lock'] as $table) {
+            foreach (['user', 'equipment', 'checklist', 'inspection_lock', 'settings'] as $table) {
                 error_log("Creating table: $table");
 
                 // Create and verify table
@@ -125,13 +116,14 @@ function initializeDatabase(): void
                 // Add test data
                 switch ($table) {
                     case 'inspection_lock':
-                        $bean->import([
-                            'ple_id' => 'TEST1',
-                            'inspector_id' => 1,
-                            'created' => date('Y-m-d H:i:s'),
-                            'force_taken_by' => null,
-                            'force_taken_at' => null
-                        ]);
+                        // Create table structure first
+                        $bean->ple_id = 'TEST1';
+                        $bean->inspector_id = 1;
+                        $bean->created = date('Y-m-d H:i:s');
+                        $bean->force_taken_by = null;
+                        $bean->force_taken_at = null;
+                        R::store($bean); // Store to create table structure
+                        R::trash($bean); // Clean up test data
                         break;
                     case 'equipment':
                         $bean->import([
@@ -150,6 +142,12 @@ function initializeDatabase(): void
                             'date_inspected' => date('Y-m-d'),
                             'time_inspected' => date('H:i:s'),
                             'inspector_initials' => 'TST'
+                        ]);
+                        break;
+                    case 'settings':
+                        $bean->import([
+                            'key' => 'debug_mode',
+                            'value' => '0'  // Debug mode disabled by default
                         ]);
                         break;
                 }

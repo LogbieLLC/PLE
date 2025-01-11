@@ -38,6 +38,17 @@ try {
         echo "Lock properties test OK\n";
         \RedBeanPHP\R::trash($lock);
 
+        // Test settings model
+        $settings = \RedBeanPHP\R::dispense('settings');
+        echo "Settings model OK\n";
+
+        // Test settings properties
+        $settings->key = 'debug_mode';
+        $settings->value = '0';
+        \RedBeanPHP\R::store($settings);
+        echo "Settings properties test OK\n";
+        \RedBeanPHP\R::trash($settings);
+
         echo "\nAll tests passed successfully!\n";
     } else {
         echo "Database connection failed!\n";
