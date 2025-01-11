@@ -1,2 +1,24 @@
-/php-backend/vendor/
+# Dependencies
+/vendor/
+/node_modules/
+
+# Runtime artifacts
+/data/logs/
+/data/ple.db
+
+# Build artifacts
 *.tar.gz
+
+# Cache
+/cache/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment files
+.env
+.env.*
+!.env.example
