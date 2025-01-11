@@ -12,6 +12,9 @@ use PLEPHP\Model\Settings;
 
 /**
  * Initialize database connection and configuration
+ *
+ * @throws \Exception When database setup fails
+ * @throws \PDOException When database connection fails
  */
 function initializeDatabase(): void
 {
@@ -69,7 +72,7 @@ function initializeDatabase(): void
 
         // Setup RedBean with configured PDO instance first
         R::setup($pdo);
-        R::debug(true); // Enable debug mode temporarily for troubleshooting
+        R::debug(false); // Disable debug mode for production
         R::freeze(false); // Allow schema modifications
 
         // Pre-register model types to ensure they exist
@@ -126,9 +129,13 @@ function initializeDatabase(): void
                 $bean = R::dispense($table);
                 error_log("Step 2: Successfully dispensed bean for: $table");
 
-                // Verify bean structure
-                if (!$bean || !isset($bean->id)) {
+                /** @var mixed $bean */
+                if (!($bean instanceof \RedBeanPHP\OODBBean)) {
                     throw new \Exception("Failed to create valid bean for: $table");
+                }
+                // All RedBean beans have an id property by design
+                if (!isset($bean->id)) {
+                    throw new \Exception("Bean missing required 'id' property");
                 }
 
                 // Add test data
@@ -172,17 +179,22 @@ function initializeDatabase(): void
 
                 // Store and verify with detailed status
                 error_log("Step 3: Attempting to store bean for: $table");
+                /** @var int|string|null $id */
                 $id = R::store($bean);
-                if (!$id) {
+                if (empty($id)) {
                     throw new \Exception("Failed to store bean for: $table");
                 }
                 error_log("Step 4: Successfully stored bean with ID: $id for: $table");
 
                 // Verify table structure in database
                 error_log("Step 5: Verifying table structure for: $table");
+                /** @var array<string,array<string,string>>|false $tableInfo */
                 $tableInfo = R::inspect($table);
-                if (!$tableInfo) {
+                if (!is_array($tableInfo)) {
                     throw new \Exception("Table verification failed for: $table");
+                }
+                if (empty($tableInfo)) {
+                    throw new \Exception("Invalid table structure: empty schema for $table");
                 }
                 error_log("Step 6: Table structure verified for: $table - " . json_encode($tableInfo));
 

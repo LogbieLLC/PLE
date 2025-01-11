@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace PLEPHP\Migration;
 
-require_once __DIR__ . '/bootstrap.php';
-
 use function PLEPHP\migrateData;
 
 /**
