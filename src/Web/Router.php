@@ -161,7 +161,7 @@ function handleRoute(): void
 
                     // Check for concurrent inspections
                     $activeInspection = R::findOne(
-                        'inspection_lock',
+                        'inspectionlock',
                         ' ple_id = ? AND created > ? ',
                         [
                             $_POST['pleId'],

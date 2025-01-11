@@ -50,7 +50,7 @@ try {
     error_log('Initializing database tables...');
 
     // Initialize tables with test data
-    foreach (['user', 'equipment', 'checklist', 'inspection_lock', 'settings'] as $table) {
+    foreach (['user', 'equipment', 'checklist', 'inspectionlock', 'settings'] as $table) {
         error_log("Creating table structure for: $table");
         
         // Create and verify table

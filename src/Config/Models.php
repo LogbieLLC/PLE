@@ -29,7 +29,7 @@ function configureModels(): void
             return $model;
         });
 
-        R::ext('inspection_lock', function ($bean) {
+        R::ext('inspectionlock', function ($bean) {
             $model = new InspectionLock();
             $model->loadBean($bean);
             return $model;

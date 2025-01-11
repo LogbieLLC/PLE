@@ -72,8 +72,11 @@ function configure_php(): array {
         'json',
         'xml',
         'curl',
-        'openssl',
-        'fpm'
+        'openssl'
+    ];
+    
+    $optional_extensions = [
+        'fpm'  // Optional for local development
     ];
     
     $errors = [];
@@ -83,10 +86,17 @@ function configure_php(): array {
         $errors[] = "PHP version must be $required_version or higher. Current version: " . PHP_VERSION;
     }
     
-    // Check extensions
+    // Check required extensions
     foreach ($required_extensions as $ext) {
         if (!extension_loaded($ext)) {
             $errors[] = "Required PHP extension missing: $ext";
+        }
+    }
+    
+    // Check optional extensions
+    foreach ($optional_extensions as $ext) {
+        if (!extension_loaded($ext)) {
+            log_message("Optional extension not available: $ext", 'info');
         }
     }
     
@@ -137,23 +147,31 @@ function validate_directories(): array {
         
         // Create directory if it doesn't exist
         if (!is_dir($path)) {
-            if (!@mkdir($path, $perms, true)) {
+            log_message("Creating directory: $dir");
+            if (!@mkdir($path, 0777, true)) {
                 $errors[] = "Failed to create directory: $dir";
                 continue;
             }
         }
         
-        // Check permissions
+        // Try to set permissions, but don't fail if we can't
         $current_perms = octdec(substr(sprintf('%o', fileperms($path)), -4));
         if ($current_perms !== $perms) {
-            if (!@chmod($path, $perms)) {
-                $errors[] = "Failed to set permissions on $dir directory";
-            }
+            @chmod($path, $perms);
+            log_message("Note: Optimal permissions ($perms) could not be set for $dir", 'info');
         }
         
-        // Check writability
+        // Verify directory is usable
+        if (!is_readable($path)) {
+            $errors[] = "Directory not readable: $dir";
+        }
         if (!is_writable($path)) {
-            $errors[] = "Directory not writable: $dir";
+            log_message("Warning: Directory not writable: $dir. Using fallback permissions.", 'info');
+            // Try fallback permissions
+            @chmod($path, 0777);
+            if (!is_writable($path)) {
+                $errors[] = "Directory not writable: $dir";
+            }
         }
     }
     
