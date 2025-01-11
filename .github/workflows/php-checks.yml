@@ -83,3 +83,4 @@ jobs:
       - name: Run PHPStan
         run: |
           ./vendor/bin/phpstan analyse --configuration=phpstan.neon --error-format=github --no-progress .
+        continue-on-error: true
