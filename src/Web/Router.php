@@ -351,7 +351,7 @@ function handleRoute(): void
 
             case 'settings':
                 requireAuth();
-                
+
                 // Start output buffering for settings operations
                 ob_start();
 
@@ -371,7 +371,7 @@ function handleRoute(): void
                     // Update global debug mode
                     $GLOBALS['PLE_DEBUG'] = $debugMode;
                     $GLOBALS['twig']->addGlobal('debugMode', $debugMode);
-                    
+
                     // Clear buffer before redirect
                     ob_end_clean();
                     header('Location: index.php?action=settings');
@@ -384,7 +384,7 @@ function handleRoute(): void
 
                 // Clear any SQL output before rendering
                 ob_clean();
-                
+
                 echo $GLOBALS['twig']->render('settings.twig', [
                     'debugMode' => $debugMode,
                     'isAdmin' => true,

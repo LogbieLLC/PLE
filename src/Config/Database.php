@@ -117,21 +117,19 @@ function initializeDatabase(): void
         // Initialize tables
         try {
             error_log('Starting table initialization...');
-
-            // Initialize core tables in dependency order with detailed logging
             error_log('Beginning table initialization sequence...');
+
             foreach (['user', 'equipment', 'checklist', 'inspection_lock', 'settings'] as $table) {
                 error_log("Step 1: Creating table structure for: $table");
-                try {
-                    // Create and verify table with detailed logging
-                    $bean = R::dispense($table);
-                    error_log("Step 2: Successfully dispensed bean for: $table");
-                    
-                    // Verify bean structure
-                    if (!$bean || !isset($bean->id)) {
-                        throw new \Exception("Failed to create valid bean for: $table");
-                    }
-                // RedBean always returns a bean, no need to check
+
+                // Create and verify table with detailed logging
+                $bean = R::dispense($table);
+                error_log("Step 2: Successfully dispensed bean for: $table");
+
+                // Verify bean structure
+                if (!$bean || !isset($bean->id)) {
+                    throw new \Exception("Failed to create valid bean for: $table");
+                }
 
                 // Add test data
                 switch ($table) {

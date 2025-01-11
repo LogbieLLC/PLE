@@ -94,8 +94,9 @@ function migrateData(string $jsonFile): void
                 $checklist->comments = $check['comments'] ?? '';
 
                 R::store($checklist);
-                $msg = sprintf("Migrated checklist: %s on %s\n", 
-                    $check['pleId'], 
+                $msg = sprintf(
+                    "Migrated checklist: %s on %s\n",
+                    $check['pleId'],
                     $check['dateInspected']
                 );
                 echo $msg;
