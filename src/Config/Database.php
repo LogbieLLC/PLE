@@ -65,21 +65,22 @@ function initializeDatabase(): void
         // Start output buffering for all database operations
         ob_start();
 
-        error_log('Setting up database and registering models...');
+        error_log('Setting up database with detailed logging...');
 
         // Setup RedBean with configured PDO instance first
         R::setup($pdo);
-        R::debug(false);
+        R::debug(true); // Enable debug mode temporarily for troubleshooting
         R::freeze(false); // Allow schema modifications
 
         // Pre-register model types to ensure they exist
-        foreach (['equipment', 'checklist', 'inspection_lock', 'settings'] as $type) {
+        error_log('Pre-registering all model types including user table...');
+        foreach (['user', 'equipment', 'checklist', 'inspection_lock', 'settings'] as $type) {
             try {
                 // Create a test bean to register the type
                 $bean = R::dispense($type);
                 R::store($bean);
                 R::trash($bean);
-                error_log("Pre-registered model type: $type");
+                error_log("Successfully pre-registered and verified model type: $type");
             } catch (\Exception $e) {
                 error_log("Failed to pre-register model type $type: " . $e->getMessage());
                 throw $e;
@@ -117,12 +118,19 @@ function initializeDatabase(): void
         try {
             error_log('Starting table initialization...');
 
-            // Initialize core tables in dependency order
+            // Initialize core tables in dependency order with detailed logging
+            error_log('Beginning table initialization sequence...');
             foreach (['user', 'equipment', 'checklist', 'inspection_lock', 'settings'] as $table) {
-                error_log("Creating table: $table");
-
-                // Create and verify table
-                $bean = R::dispense($table);
+                error_log("Step 1: Creating table structure for: $table");
+                try {
+                    // Create and verify table with detailed logging
+                    $bean = R::dispense($table);
+                    error_log("Step 2: Successfully dispensed bean for: $table");
+                    
+                    // Verify bean structure
+                    if (!$bean || !isset($bean->id)) {
+                        throw new \Exception("Failed to create valid bean for: $table");
+                    }
                 // RedBean always returns a bean, no need to check
 
                 // Add test data
@@ -164,20 +172,26 @@ function initializeDatabase(): void
                         break;
                 }
 
-                // Store and verify
+                // Store and verify with detailed status
+                error_log("Step 3: Attempting to store bean for: $table");
                 $id = R::store($bean);
                 if (!$id) {
-                    throw new \Exception("Failed to store $table bean");
+                    throw new \Exception("Failed to store bean for: $table");
                 }
+                error_log("Step 4: Successfully stored bean with ID: $id for: $table");
 
-                // Verify table exists
-                if (!R::inspect($table)) {
-                    throw new \Exception("Failed to create table: $table");
+                // Verify table structure in database
+                error_log("Step 5: Verifying table structure for: $table");
+                $tableInfo = R::inspect($table);
+                if (!$tableInfo) {
+                    throw new \Exception("Table verification failed for: $table");
                 }
+                error_log("Step 6: Table structure verified for: $table - " . json_encode($tableInfo));
 
-                // Clean up test bean
+                // Clean up test data
+                error_log("Step 7: Cleaning up test data for: $table");
                 R::trash($bean);
-                error_log("Successfully created table: $table");
+                error_log("Step 8: Successfully initialized table: $table");
             }
 
             // Initialize admin user if needed
