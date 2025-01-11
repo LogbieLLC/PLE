@@ -42,17 +42,38 @@ function log_message(string $message, string $type = 'info'): void {
 }
 
 /**
- * Validate PHP version and extensions
+ * Configure and validate PHP settings
  */
-function validate_php(): array {
+function configure_php(): array {
+    $errors = [];
     $required_version = '8.2.0';
+    
+    // Check PHP version
+    if (version_compare(PHP_VERSION, $required_version, '<')) {
+        $errors[] = "PHP version must be $required_version or higher. Current version: " . PHP_VERSION;
+    }
+    
+    // Configure timezone
+    $required_timezone = 'America/Chicago';
+    if (!date_default_timezone_set($required_timezone)) {
+        $errors[] = "Failed to set timezone to $required_timezone";
+    }
+    
+    // Verify timezone setting
+    $current_timezone = date_default_timezone_get();
+    if ($current_timezone !== $required_timezone) {
+        $errors[] = "Timezone must be set to $required_timezone. Current timezone: $current_timezone";
+    }
+    
+    // Check required extensions
     $required_extensions = [
         'pdo_sqlite',
         'mbstring',
         'json',
         'xml',
         'curl',
-        'openssl'
+        'openssl',
+        'fpm'
     ];
     
     $errors = [];
@@ -96,7 +117,19 @@ function validate_directories(): array {
         'data' => 0775,
         'cache' => 0775,
         'templates' => 0755,
-        'public' => 0755
+        'public' => 0755,
+        'logs' => 0775
+    ];
+    
+    // Required PHP extensions
+    $required_extensions = [
+        'pdo_sqlite',
+        'mbstring',
+        'json',
+        'xml',
+        'curl',
+        'openssl',
+        'fpm'
     ];
     
     foreach ($required_dirs as $dir => $perms) {
@@ -185,23 +218,24 @@ function run_setup(): void {
         <h1>PLE System Setup</h1>";
     }
     
-    // Run validation steps
+    // Run configuration and validation steps
     log_message("Starting PLE system setup...");
     
-    // 1. Validate PHP
-    log_message("Checking PHP configuration...");
-    if ($php_errors = validate_php()) {
+    // 1. Configure PHP and timezone
+    log_message("Configuring PHP and timezone settings...");
+    if ($php_errors = configure_php()) {
         $errors = array_merge($errors, $php_errors);
     } else {
         $success[] = "PHP configuration valid";
+        $success[] = "Timezone configured to America/Chicago";
     }
     
-    // 2. Validate timezone
-    log_message("Checking timezone configuration...");
-    if ($tz_errors = validate_timezone()) {
-        $errors = array_merge($errors, $tz_errors);
+    // 2. Check PHP-FPM status
+    log_message("Checking PHP-FPM status...");
+    if (extension_loaded('fpm')) {
+        $success[] = "PHP-FPM extension loaded";
     } else {
-        $success[] = "Timezone configuration valid";
+        $errors[] = "PHP-FPM extension not available. Please install php8.2-fpm package";
     }
     
     // 3. Validate directories
