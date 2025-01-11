@@ -12,6 +12,9 @@ use PLEPHP\Model\Settings;
 
 /**
  * Initialize database connection and configuration
+ *
+ * @throws \Exception When database setup fails
+ * @throws \PDOException When database connection fails
  */
 function initializeDatabase(): void
 {
@@ -21,8 +24,8 @@ function initializeDatabase(): void
 
     // Ensure data directory exists with proper permissions
     $dataDir = __DIR__ . '/../../data';
-    if (is_dir($dataDir) === false) {
-        if (@mkdir($dataDir, 0777, true) === false) {
+    if (!is_dir($dataDir)) {
+        if (!@mkdir($dataDir, 0777, true)) {
             throw new \Exception("Failed to create data directory");
         }
         chmod($dataDir, 0777);
@@ -33,14 +36,14 @@ function initializeDatabase(): void
 
     try {
         // Ensure database file exists and is writable
-        if (file_exists($dbfile) === false) {
-            if (@touch($dbfile) === false) {
+        if (!file_exists($dbfile)) {
+            if (!@touch($dbfile)) {
                 throw new \Exception("Failed to create database file");
             }
             chmod($dbfile, 0666);
         }
 
-        if (is_writable($dbfile) === false) {
+        if (!is_writable($dbfile)) {
             throw new \Exception("Database file is not writable");
         }
 
@@ -55,10 +58,10 @@ function initializeDatabase(): void
         ]);
 
         // Disable all RedBean debug features
-        if (defined('REDBEAN_DISABLE_QUERY_COUNTER') === false) {
+        if (!defined('REDBEAN_DISABLE_QUERY_COUNTER')) {
             define('REDBEAN_DISABLE_QUERY_COUNTER', true);
         }
-        if (defined('REDBEAN_INSPECT') === false) {
+        if (!defined('REDBEAN_INSPECT')) {
             define('REDBEAN_INSPECT', false);
         }
 
@@ -69,7 +72,7 @@ function initializeDatabase(): void
 
         // Setup RedBean with configured PDO instance first
         R::setup($pdo);
-        R::debug(true); // Enable debug mode temporarily for troubleshooting
+        R::debug(false); // Disable debug mode for production
         R::freeze(false); // Allow schema modifications
 
         // Pre-register model types to ensure they exist
@@ -126,9 +129,12 @@ function initializeDatabase(): void
                 $bean = R::dispense($table);
                 error_log("Step 2: Successfully dispensed bean for: $table");
 
-                // Verify bean structure
-                if ($bean instanceof \RedBeanPHP\OODBBean === false || isset($bean->id) === false) {
+                if (!is_object($bean) || !($bean instanceof \RedBeanPHP\OODBBean)) {
                     throw new \Exception("Failed to create valid bean for: $table");
+                }
+                // All RedBean beans have an id property by design
+                if (!property_exists($bean, 'id')) {
+                    throw new \Exception("Bean missing required 'id' property");
                 }
 
                 // Add test data
@@ -173,7 +179,7 @@ function initializeDatabase(): void
                 // Store and verify with detailed status
                 error_log("Step 3: Attempting to store bean for: $table");
                 $id = R::store($bean);
-                if ($id === 0 || $id === null) {
+                if (!$id) {
                     throw new \Exception("Failed to store bean for: $table");
                 }
                 error_log("Step 4: Successfully stored bean with ID: $id for: $table");
@@ -181,7 +187,7 @@ function initializeDatabase(): void
                 // Verify table structure in database
                 error_log("Step 5: Verifying table structure for: $table");
                 $tableInfo = R::inspect($table);
-                if ($tableInfo === false || $tableInfo === null) {
+                if (!is_array($tableInfo) || empty($tableInfo)) {
                     throw new \Exception("Table verification failed for: $table");
                 }
                 error_log("Step 6: Table structure verified for: $table - " . json_encode($tableInfo));
@@ -193,7 +199,7 @@ function initializeDatabase(): void
             }
 
             // Initialize admin user if needed
-            if (R::count('user') === 0) {
+            if (!R::count('user')) {
                 error_log('Creating admin user...');
                 $admin = R::dispense('user');
                 $admin->username = 'admin';
@@ -204,7 +210,7 @@ function initializeDatabase(): void
             }
 
             // Final connection test
-            if (R::testConnection() === false) {
+            if (!R::testConnection()) {
                 throw new \Exception('Database connection test failed');
             }
             error_log('All tables initialized successfully');
