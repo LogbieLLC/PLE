@@ -62,12 +62,35 @@ chmod -R 775 ~/webapps/ple/data
 
 ### 6. Environment Configuration
 ```bash
-# Set timezone to America/Chicago (UTC-6)
+# Install PHP-FPM and required extensions
+sudo apt-get update
+sudo apt-get install -y php8.2-fpm php8.2-sqlite3 php8.2-mbstring php8.2-xml php8.2-curl
+
+# Configure timezone (UTC-6/Chicago)
 echo "date.timezone = America/Chicago" | sudo tee /etc/php/8.2/fpm/conf.d/timezone.ini
+echo "date.timezone = America/Chicago" | sudo tee /etc/php/8.2/cli/conf.d/timezone.ini
 sudo systemctl restart php8.2-fpm
 
-# Set debug mode (development only)
+# Verify timezone configuration
+php -r "echo date_default_timezone_get();"  # Should output: America/Chicago
+
+# Set application environment
 export PLE_DEBUG=false  # Production setting
+export PLE_DATA_DIR=/home/ple/webapps/ple/data
+export PLE_DB_NAME=ple.db
+```
+
+### 6.1 PHP-FPM Configuration
+```bash
+# Configure PHP-FPM pool
+sudo cp /etc/php/8.2/fpm/pool.d/www.conf /etc/php/8.2/fpm/pool.d/ple.conf
+sudo sed -i 's/\[www\]/[ple]/' /etc/php/8.2/fpm/pool.d/ple.conf
+sudo sed -i 's/user = www-data/user = ple/' /etc/php/8.2/fpm/pool.d/ple.conf
+sudo sed -i 's/group = www-data/group = ple/' /etc/php/8.2/fpm/pool.d/ple.conf
+sudo sed -i 's/listen = .*/listen = /var/run/php/php8.2-fpm-ple.sock/' /etc/php/8.2/fpm/pool.d/ple.conf
+
+# Restart PHP-FPM to apply changes
+sudo systemctl restart php8.2-fpm
 ```
 
 ### 7. Access Information
