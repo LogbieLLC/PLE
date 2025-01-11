@@ -12,19 +12,24 @@ use function PLEPHP\Config\configureModels;
 // Clean any existing output buffers
 try {
     while (ob_get_level() > 0) {
-        if (@ob_end_clean() === false) {
+        $bufferCleaned = @ob_end_clean();
+        if ($bufferCleaned === false) {
             throw new \RuntimeException('Failed to clean output buffer');
         }
     }
     // Start fresh output buffer
-    if (@ob_start() === false) {
+    $bufferStarted = @ob_start();
+    if ($bufferStarted === false) {
         throw new \RuntimeException('Failed to start output buffer');
     }
 } catch (\Exception $bufferException) {
     error_log('Buffer cleanup failed: ' . $bufferException->getMessage());
     // Ensure clean state
     while (ob_get_level() > 0) {
-        @ob_end_clean();
+        $bufferCleaned = @ob_end_clean();
+        if ($bufferCleaned === false) {
+            error_log('Warning: Failed to clean buffer in error handler');
+        }
     }
 }
 
@@ -36,26 +41,37 @@ try {
     initializeDatabase();
 
     // Verify database connection before proceeding
-    if (!R::testConnection()) {
+    $connectionTest = R::testConnection();
+    if (!$connectionTest) {
         throw new \Exception('Database connection failed');
     }
 
-    // Reset database to clean state
+    // Keep database in fluid mode for initialization
+    R::freeze(false);
+
+    // Keep database in fluid mode and reset for fresh start
     R::nuke();
     R::freeze(false);
 
-    // Configure models after database reset
+    // Configure models to register types
     configureModels();
 
+    // Verify database setup
+    $verificationTest = R::testConnection();
+    if (!$verificationTest) {
+        throw new \Exception('Database connection verification failed');
+    }
+
+    error_log('Database initialized successfully');
     error_log('Initializing database tables...');
 
     // Initialize tables with test data
     foreach (['user', 'equipment', 'checklist', 'inspection_lock', 'settings'] as $table) {
         error_log("Creating table structure for: $table");
-        
+
         // Create and verify table
         $bean = R::dispense($table);
-        
+
         // Add test data based on table type
         switch ($table) {
             case 'user':
@@ -68,13 +84,13 @@ try {
                     error_log('Admin user created');
                 }
                 break;
-                
+
             case 'inspection_lock':
                 $bean->ple_id = 'TEST1';
                 $bean->inspector_id = 1;
                 $bean->created = date('Y-m-d H:i:s');
                 break;
-                
+
             case 'equipment':
                 $bean->import([
                     'ple_id' => 'TEST1',
@@ -86,7 +102,7 @@ try {
                     'department' => 'test'
                 ]);
                 break;
-                
+
             case 'checklist':
                 $bean->import([
                     'ple_id' => 'TEST1',
@@ -95,7 +111,7 @@ try {
                     'inspector_initials' => 'TST'
                 ]);
                 break;
-                
+
             case 'settings':
                 $bean->import([
                     'key' => 'debug_mode',
@@ -103,22 +119,22 @@ try {
                 ]);
                 break;
         }
-        
+
         // Store test data to create table structure
         R::store($bean);
-        
+
         // Clean up test data (except admin user)
         if ($table !== 'user') {
             R::trash($bean);
         }
-        
+
         // Verify table exists
         if (!R::inspect($table)) {
             throw new \Exception("Failed to create table: $table");
         }
         error_log("Successfully initialized table: $table");
     }
-    
+
     error_log('All tables initialized successfully');
 } catch (\Exception $e) {
     error_log('Database initialization failed: ' . $e->getMessage());

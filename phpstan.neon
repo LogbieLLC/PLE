@@ -11,3 +11,5 @@ parameters:
         - RedBeanPHP\OODBBean
         - PLEPHP\Model\Equipment
         - PLEPHP\Model\Checklist
+        - PLEPHP\Model\InspectionLock
+    treatPhpDocTypesAsCertain: false
