@@ -72,4 +72,4 @@ jobs:
       
       - name: Run PHPStan
         run: |
-          vendor/bin/phpstan analyse --error-format=github --no-progress
+          vendor/bin/phpstan analyse --configuration=phpstan.neon --error-format=github --no-progress .
