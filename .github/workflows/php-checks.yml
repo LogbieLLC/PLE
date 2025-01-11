@@ -1,16 +1,10 @@
-name: PHP Code Quality Checks
+name: PHP Checks
 
 on:
   push:
-    branches: [ main, 'devin/*' ]
-    paths:
-      - 'php-backend/**'
-      - '.github/workflows/php-checks.yml'
+    branches: [ "**" ]
   pull_request:
-    branches: [ main ]
-    paths:
-      - 'php-backend/**'
-      - '.github/workflows/php-checks.yml'
+    branches: [ "**" ]
   workflow_dispatch:
 
 permissions:
@@ -29,9 +23,7 @@ env:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: php-backend
+    # Files are now in repository root
 
     steps:
       - uses: actions/checkout@v3
@@ -42,7 +34,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: mbstring, intl, sqlite3
+          extensions: mbstring, intl, sqlite3, xml, curl, tokenizer, xmlwriter, simplexml
           tools: composer:v2, cs2pr
           coverage: none
       
@@ -65,7 +57,7 @@ jobs:
       - name: Run PHPCS Auto-Fix
         if: github.event_name == 'pull_request'
         run: |
-          vendor/bin/phpcbf --standard=PSR12 --ignore=vendor/*,cache/* ./
+          composer phpcbf -- --standard=PSR12 --ignore=vendor,cache .
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           git add .
@@ -75,9 +67,9 @@ jobs:
       
       - name: Run PHPCS Manual Check
         run: |
-          vendor/bin/phpcs --standard=PSR12 --report=checkstyle --ignore=vendor/*,cache/* ./ | cs2pr
+          composer phpcs -- --standard=PSR12 --report=checkstyle --ignore=vendor,cache . | cs2pr
         continue-on-error: true
       
       - name: Run PHPStan
         run: |
-          vendor/bin/phpstan analyse --error-format=github --no-progress
+          composer phpstan -- --error-format=github
