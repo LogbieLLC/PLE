@@ -129,11 +129,12 @@ function initializeDatabase(): void
                 $bean = R::dispense($table);
                 error_log("Step 2: Successfully dispensed bean for: $table");
 
-                if (!is_object($bean) || !($bean instanceof \RedBeanPHP\OODBBean)) {
+                /** @var mixed $bean */
+                if (!($bean instanceof \RedBeanPHP\OODBBean)) {
                     throw new \Exception("Failed to create valid bean for: $table");
                 }
                 // All RedBean beans have an id property by design
-                if (!property_exists($bean, 'id')) {
+                if (!isset($bean->id)) {
                     throw new \Exception("Bean missing required 'id' property");
                 }
 
@@ -178,17 +179,22 @@ function initializeDatabase(): void
 
                 // Store and verify with detailed status
                 error_log("Step 3: Attempting to store bean for: $table");
+                /** @var int|string|null $id */
                 $id = R::store($bean);
-                if (!$id) {
+                if (empty($id)) {
                     throw new \Exception("Failed to store bean for: $table");
                 }
                 error_log("Step 4: Successfully stored bean with ID: $id for: $table");
 
                 // Verify table structure in database
                 error_log("Step 5: Verifying table structure for: $table");
+                /** @var array<string,array<string,string>>|false $tableInfo */
                 $tableInfo = R::inspect($table);
-                if (!is_array($tableInfo) || empty($tableInfo)) {
+                if (!is_array($tableInfo)) {
                     throw new \Exception("Table verification failed for: $table");
+                }
+                if (empty($tableInfo)) {
+                    throw new \Exception("Invalid table structure: empty schema for $table");
                 }
                 error_log("Step 6: Table structure verified for: $table - " . json_encode($tableInfo));
 
