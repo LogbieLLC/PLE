@@ -65,170 +65,28 @@ function initializeDatabase(): void
             define('REDBEAN_INSPECT', false);
         }
 
-        // Start output buffering for all database operations
+        // Start output buffering for database operations
         ob_start();
 
-        error_log('Setting up database with detailed logging...');
+        error_log('Setting up database connection...');
 
-        // Setup RedBean with configured PDO instance first
+        // Setup RedBean with configured PDO instance
         R::setup($pdo);
         R::debug(false); // Disable debug mode for production
         R::freeze(false); // Allow schema modifications
 
-        // Pre-register model types to ensure they exist
-        error_log('Pre-registering all model types including user table...');
-        foreach (['user', 'equipment', 'checklist', 'inspection_lock', 'settings'] as $type) {
-            try {
-                // Create a test bean to register the type
-                $bean = R::dispense($type);
-                R::store($bean);
-                R::trash($bean);
-                error_log("Successfully pre-registered and verified model type: $type");
-            } catch (\Exception $e) {
-                error_log("Failed to pre-register model type $type: " . $e->getMessage());
-                throw $e;
-            }
+        error_log('Database connection established successfully');
+
+        // Final connection test
+        if (!R::testConnection()) {
+            throw new \Exception('Database connection test failed');
         }
-
-        // Register model extensions
-        R::ext('equipment', function ($bean) {
-            $model = new \PLEPHP\Model\Equipment();
-            $model->loadBean($bean);
-            return $model;
-        });
-
-        R::ext('checklist', function ($bean) {
-            $model = new \PLEPHP\Model\Checklist();
-            $model->loadBean($bean);
-            return $model;
-        });
-
-        R::ext('inspection_lock', function ($bean) {
-            $model = new \PLEPHP\Model\InspectionLock();
-            $model->loadBean($bean);
-            return $model;
-        });
-
-        R::ext('settings', function ($bean) {
-            $model = new \PLEPHP\Model\Settings();
-            $model->loadBean($bean);
-            return $model;
-        });
-
-        error_log('Model extensions registered successfully');
-
-        // Initialize tables
-        try {
-            error_log('Starting table initialization...');
-            error_log('Beginning table initialization sequence...');
-
-            foreach (['user', 'equipment', 'checklist', 'inspection_lock', 'settings'] as $table) {
-                error_log("Step 1: Creating table structure for: $table");
-
-                // Create and verify table with detailed logging
-                $bean = R::dispense($table);
-                error_log("Step 2: Successfully dispensed bean for: $table");
-
-                /** @var mixed $bean */
-                if (!($bean instanceof \RedBeanPHP\OODBBean)) {
-                    throw new \Exception("Failed to create valid bean for: $table");
-                }
-                // All RedBean beans have an id property by design
-                if (!isset($bean->id)) {
-                    throw new \Exception("Bean missing required 'id' property");
-                }
-
-                // Add test data
-                switch ($table) {
-                    case 'inspection_lock':
-                        // Create table structure first
-                        $bean->ple_id = 'TEST1';
-                        $bean->inspector_id = 1;
-                        $bean->created = date('Y-m-d H:i:s');
-                        $bean->force_taken_by = null;
-                        $bean->force_taken_at = null;
-                        R::store($bean); // Store to create table structure
-                        R::trash($bean); // Clean up test data
-                        break;
-                    case 'equipment':
-                        $bean->import([
-                            'ple_id' => 'TEST1',
-                            'ple_id_normalized' => 'TEST1',
-                            'type' => 'test',
-                            'make' => 'test',
-                            'model' => 'test',
-                            'serial_number' => 'test',
-                            'department' => 'test'
-                        ]);
-                        break;
-                    case 'checklist':
-                        $bean->import([
-                            'ple_id' => 'TEST1',
-                            'date_inspected' => date('Y-m-d'),
-                            'time_inspected' => date('H:i:s'),
-                            'inspector_initials' => 'TST'
-                        ]);
-                        break;
-                    case 'settings':
-                        $bean->import([
-                            'key' => 'debug_mode',
-                            'value' => '0'  // Debug mode disabled by default
-                        ]);
-                        break;
-                }
-
-                // Store and verify with detailed status
-                error_log("Step 3: Attempting to store bean for: $table");
-                /** @var int|string|null $id */
-                $id = R::store($bean);
-                if (empty($id)) {
-                    throw new \Exception("Failed to store bean for: $table");
-                }
-                error_log("Step 4: Successfully stored bean with ID: $id for: $table");
-
-                // Verify table structure in database
-                error_log("Step 5: Verifying table structure for: $table");
-                /** @var array<string,array<string,string>>|false $tableInfo */
-                $tableInfo = R::inspect($table);
-                if (!is_array($tableInfo)) {
-                    throw new \Exception("Table verification failed for: $table");
-                }
-                if (empty($tableInfo)) {
-                    throw new \Exception("Invalid table structure: empty schema for $table");
-                }
-                error_log("Step 6: Table structure verified for: $table - " . json_encode($tableInfo));
-
-                // Clean up test data
-                error_log("Step 7: Cleaning up test data for: $table");
-                R::trash($bean);
-                error_log("Step 8: Successfully initialized table: $table");
-            }
-
-            // Initialize admin user if needed
-            if (!R::count('user')) {
-                error_log('Creating admin user...');
-                $admin = R::dispense('user');
-                $admin->username = 'admin';
-                $admin->password = password_hash('admin', PASSWORD_DEFAULT);
-                $admin->role = 'admin';
-                R::store($admin);
-                error_log('Admin user created');
-            }
-
-            // Final connection test
-            if (!R::testConnection()) {
-                throw new \Exception('Database connection test failed');
-            }
-            error_log('All tables initialized successfully');
-        } catch (\Exception $e) {
-            error_log('Table initialization failed: ' . $e->getMessage());
-            throw $e;
-        } finally {
-            // Clear any SQL output
-            ob_end_clean();
-        }
+        error_log('Database connection verified');
     } catch (\Exception $e) {
         error_log('Database setup failed: ' . $e->getMessage());
         throw new \Exception('Database setup failed: ' . $e->getMessage());
+    } finally {
+        // Clear any SQL output
+        ob_end_clean();
     }
 }
