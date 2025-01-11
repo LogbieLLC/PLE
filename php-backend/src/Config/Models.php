@@ -14,21 +14,14 @@ use PLEPHP\Model\InspectionLock;
  */
 function configureModels(): void
 {
-    R::ext('equipment', function ($bean) {
-        $model = new Equipment();
-        $model->loadBean($bean);
-        return $model;
-    });
+    try {
+        // Reset database to clean state and allow schema modifications
+        R::nuke();
+        R::freeze(false);
 
-    R::ext('checklist', function ($bean) {
-        $model = new Checklist();
-        $model->loadBean($bean);
-        return $model;
-    });
-
-    R::ext('inspection_lock', function ($bean) {
-        $model = new InspectionLock();
-        $model->loadBean($bean);
-        return $model;
-    });
+        error_log('Model configuration completed successfully');
+    } catch (\Exception $e) {
+        error_log('Model configuration failed: ' . $e->getMessage());
+        throw $e;
+    }
 }

@@ -17,6 +17,21 @@
         </header>
 
         <main>
+            {% if currentLock %}
+                <div class="alert alert-warning mb-3">
+                    <p class="mb-2">This inspection is currently locked by {{ currentLock.inspector_id }} since {{ currentLock.created|date('g:i A') }}.</p>
+                    {% if user.role == 'admin' or currentLock.created < date('-30 minutes')|date('Y-m-d H:i:s') %}
+                        <a href="index.php?action=takeOverInspection&pleId={{ selectedPleId }}" class="btn btn-warning">Take Control</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if previousLock and previousLock.force_taken_by %}
+                <div class="alert alert-info mb-3">
+                    <p class="mb-0">Your inspection of {{ previousLock.ple_id }} was taken over by another user at {{ previousLock.force_taken_at|date('g:i A') }}.</p>
+                </div>
+            {% endif %}
+
             {% if previousLock %}
                 <div class="alert alert-warning mb-4">
                     <h4 class="alert-heading">Inspection Control Changed</h4>

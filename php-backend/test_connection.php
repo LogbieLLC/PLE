@@ -7,8 +7,7 @@ ob_start();
 
 // Include required files in correct order
 require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/src/Config/Models.php';
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/bootstrap.php';
 
 try {
     // Test database connection
@@ -23,6 +22,21 @@ try {
         // Test checklist model
         $checklist = \RedBeanPHP\R::dispense('checklist');
         echo "Checklist model OK\n";
+
+        // Test inspection lock model
+        $lock = \RedBeanPHP\R::dispense('inspection_lock');
+        // RedBean always returns a bean, no need to check
+        echo "Inspection lock model OK\n";
+
+        // Test model properties
+        $lock->ple_id = 'TEST1';
+        $lock->inspector_id = 1;
+        $lock->created = date('Y-m-d H:i:s');
+        $lock->force_taken_by = null;
+        $lock->force_taken_at = null;
+        \RedBeanPHP\R::store($lock);
+        echo "Lock properties test OK\n";
+        \RedBeanPHP\R::trash($lock);
 
         echo "\nAll tests passed successfully!\n";
     } else {

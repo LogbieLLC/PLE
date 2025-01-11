@@ -18,7 +18,7 @@ use RedBeanPHP\Util\Look;
  * A matchUp is a match-and-update combination in terms of beans.
  * Typically login related problems are all about a match and
  * a conditional update.
- * 
+ *
  * @file    RedUNIT/Base/Matchup.php
  * @desc    Tests MatchUp
  * @author  Gabor de Mooij and the RedBeanPHP Community
@@ -53,7 +53,7 @@ class Productivity extends Base
 			'token'     => sha1(rand(0,9000) . time()),
 			'tokentime' => time()
 		), NULL, $account );
-		
+
 		asrt( $didGenToken, TRUE );
 		asrt( !is_null( $account->token ) , TRUE );
 		asrt( !is_null( $account->tokentime ) , TRUE );
@@ -66,7 +66,7 @@ class Productivity extends Base
 		), NULL, $account );
 		asrt( $account->pass, '1234' );
 		asrt( $account->token, '' );
-		
+
 		/* simulate a login */
 		$didFindUsr = $matchUp->matchUp( 'account', ' uname = ? ', array( 'Shawn' ), array(
 			'attempts' => function( $acc ) {

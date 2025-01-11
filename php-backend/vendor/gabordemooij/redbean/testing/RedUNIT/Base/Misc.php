@@ -621,7 +621,7 @@ class Misc extends Base
 		asrt( $beanA->equals( $beanB ), FALSE );
 		asrt( $beanB->equals( $beanA ), FALSE );
 	}
-  
+
 	/**
 	 * Test if adding SimpleModles to a shared list will auto unbox them.
 	 */

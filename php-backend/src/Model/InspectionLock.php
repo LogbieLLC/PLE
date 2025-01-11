@@ -15,5 +15,4 @@ namespace PLEPHP\Model;
 class InspectionLock extends \RedBeanPHP\SimpleModel
 {
     // Inherits all functionality from SimpleModel
-    // Properties documented above for IDE support and type checking
 }

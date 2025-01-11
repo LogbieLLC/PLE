@@ -379,7 +379,7 @@ class Joins extends Base
 
 	/**
 	 * Can we join multiple tables with the same parent?
-	 * 
+	 *
 	 * @return void
 	 */
 	public function testMultipleJoinsSameParent()
@@ -623,11 +623,11 @@ class Joins extends Base
 		$books = R::find('book', ' @own.detail.title LIKE ? AND @own.page.text LIKE ?', array('Nah', '%'));
 		asrt(count($books),0);
 		//joined+joined+shared+shared+own+own
-		$books = R::find('book', ' @own.detail.title LIKE ? AND @own.page.text LIKE ? 
+		$books = R::find('book', ' @own.detail.title LIKE ? AND @own.page.text LIKE ?
 		AND @joined.publisher.name LIKE ? AND @joined.author.name LIKE ?
 		AND @shared.shop.name LIKE ? AND @shared.category.name LIKE ?', array('Book%', 'Lorem%','Good%','Albert','Books4%','bio%'));
 		asrt(count($books),1);
-		$books = R::find('book', ' @own.detail.title LIKE ? AND @own.page.text LIKE ? 
+		$books = R::find('book', ' @own.detail.title LIKE ? AND @own.page.text LIKE ?
 		AND @joined.publisher.name LIKE ? AND @joined.author.name LIKE ?
 		AND @shared.shop.name LIKE ? AND @shared.category.name LIKE ?', array('%', '%','%','%','%','%'));
 		asrt(count($books),2);
@@ -718,7 +718,7 @@ class Joins extends Base
 		$people = R::find( 'person', ' @joined.movement.name = ? ', array('romanticism')); // This works (aliases not involved)
 		asrt(count($people), 1);
 		$people = R::find( 'person', ' @joined.movement.name = ? ', array('gothic')); // This works (aliases not involved)
-		asrt(count($people), 1);		
+		asrt(count($people), 1);
 		$people = R::find( 'person', ' @joined.movement.name = ? ', array('popscience')); // This works (aliases not involved)
 		asrt(count($people), 0);
 		$movements = R::find( 'movement', ' @own.author.name LIKE ? ', array( 'A%' )); // This works
@@ -775,7 +775,7 @@ class Joins extends Base
 
 	/**
 	 * Tests joins with ownCount().
-	 * 
+	 *
 	 * @return void
 	 */
 	public function testJoinsInCount()

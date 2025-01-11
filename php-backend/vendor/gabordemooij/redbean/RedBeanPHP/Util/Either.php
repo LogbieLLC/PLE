@@ -9,7 +9,7 @@ namespace RedBeanPHP\Util;
  * substitute the NULL coalesce operator in RedBeanPHP
  * (since the lazy loading interface interferes with the ??
  * operator) in a way that can also be used in older PHP-versions.
- * 
+ *
  * @file    RedBeanPHP/Util/Either.php
  * @author  Gabor de Mooij and the RedBeanPHP Community
  * @license BSD/GPLv2
@@ -30,7 +30,7 @@ class Either {
 	 * Constructs a new Either-instance.
 	 *
 	 * Example usage:
-	 * 
+	 *
 	 * <code>
 	 * $author = $text
 	 * 				->either()
@@ -40,7 +40,7 @@ class Either {
 	 * 				->name
 	 * 				->or('unknown');
 	 * </code>
-	 * 
+	 *
 	 * The Either-class lets you access bean properties without having to do
 	 * NULL-checks. The mechanism resembles the use of the ?? somewhat but
 	 * offers backward compatibility with older PHP versions. The mechanism also works

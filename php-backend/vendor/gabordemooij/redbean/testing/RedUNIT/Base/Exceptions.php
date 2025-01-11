@@ -42,7 +42,7 @@ class Exceptions extends Base {
 	 *   both methods will return an empty bean in fluid mode
 	 *   and throw an exception in frozen mode.
 	 * - If something else happens (lock timeout for instance)
-	 *   both methods will always throw an exception, even in fluid mode. 
+	 *   both methods will always throw an exception, even in fluid mode.
 	 *
 	 * @return void
 	 */

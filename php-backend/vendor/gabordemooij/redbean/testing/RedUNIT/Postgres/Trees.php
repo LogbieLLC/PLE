@@ -31,7 +31,7 @@ class Trees extends Postgres
 		}
 		return implode( ',', $names );
 	}
-	
+
 	/**
 	 * Test trees
 	 *
@@ -85,7 +85,7 @@ class Trees extends Postgres
 		asrt( R::countChildren( $winePage, ' title = :title  ', array( ':title' => 'wines' ) ) , 1 );
 		asrt( R::countParents( $winePage, '  title != :title  ', array( ':title' => 'home' ) ) , 2 );
 	}
-	
+
 	/**
 	 * Test CTE and Parsed Joins.
 	 *

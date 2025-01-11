@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-// Initialize database (with output buffering)
+// Import required dependencies
+use RedBeanPHP\R;
 use function PLEPHP\Config\initializeDatabase;
+use function PLEPHP\Config\configureModels;
 
-// Clean any existing output buffers
 // Clean any existing output buffers
 try {
     while (ob_get_level() !== 0) {
@@ -26,39 +27,48 @@ try {
         @ob_end_clean();
     }
 }
+
+// Initialize database with output buffering
 ob_start();
-initializeDatabase();
-ob_end_clean();
 
-use function PLEPHP\Config\configureModels;
-
-// Initialize core components
-session_start();
-configureModels();
-
-// Verify database connection
-if (!\RedBeanPHP\R::testConnection()) {
-    die('Database connection failed');
-}
-
-// Initialize users table if needed
-ob_start();
 try {
-    $userCount = \RedBeanPHP\R::count('user');
+    // Initialize database connection first
+    initializeDatabase();
 
-    if (!$userCount) {
+    // Verify database connection before proceeding
+    if (!R::testConnection()) {
+        throw new \Exception('Database connection failed');
+    }
+
+    // Configure models after database is ready
+    configureModels();
+
+    // Initialize core tables
+    if (!R::count('user')) {
         // Create temporary admin user for testing
-        // TODO: Remove or change credentials before deploying to production
-        $admin = \RedBeanPHP\R::dispense('user');
+        $admin = R::dispense('user');
         $admin->username = 'admin';
         $admin->password = password_hash('admin', PASSWORD_DEFAULT);
         $admin->role = 'admin';
-        \RedBeanPHP\R::store($admin);
+        R::store($admin);
     }
+
+    // Verify all required tables exist
+    foreach (['user', 'equipment', 'checklist', 'inspection_lock'] as $table) {
+        if (!R::inspect($table)) {
+            throw new \Exception("Required table '$table' does not exist");
+        }
+    }
+    error_log('All required tables verified');
+} catch (\Exception $e) {
+    error_log('Database initialization failed: ' . $e->getMessage());
+    throw $e;
 } finally {
-    // Always clean the buffer regardless of success or failure
     ob_end_clean();
 }
+
+// Initialize core components
+session_start();
 
 // Setup Twig environment
 $loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/templates');
@@ -70,6 +80,13 @@ $GLOBALS['twig'] = new \Twig\Environment($loader, [
 // Set timezone to UTC-6 (Chicago)
 date_default_timezone_set('America/Chicago');
 
+// Set debug mode from environment variable
+$debugMode = getenv('PLE_DEBUG') === 'true';
+
 // Add global variables to Twig
 $GLOBALS['twig']->addGlobal('user', $_SESSION['user'] ?? null);
 $GLOBALS['twig']->addGlobal('currentTime', date('g:i A T'));
+$GLOBALS['twig']->addGlobal('debugMode', $debugMode);
+
+// Store debug mode in global scope for router access
+$GLOBALS['PLE_DEBUG'] = $debugMode;

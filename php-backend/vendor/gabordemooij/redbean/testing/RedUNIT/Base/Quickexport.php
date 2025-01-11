@@ -13,7 +13,7 @@ use RedBeanPHP\OODBBean as OODBBean;
  * Tests the Quick Export functionality.
  * The Quick Export Utility Class provides functionality to easily
  * expose the result of SQL queries as well-known formats like CSV.
- * 
+ *
  * @file    RedUNIT/Base/Quickexport.php
  * @desc    Tests Quick Export
  * @author  Gabor de Mooij and the RedBeanPHP Community
