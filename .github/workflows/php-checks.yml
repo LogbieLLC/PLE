@@ -51,13 +51,16 @@ jobs:
       
       - name: Install dependencies
         run: |
-          composer install --prefer-dist --no-progress
           composer validate --strict
+          composer install --prefer-dist --no-progress
+
+      - name: Verify PHPStan config
+        run: test -f phpstan.neon || echo "PHPStan config not found"
       
       - name: Run PHPCS Auto-Fix
         if: github.event_name == 'pull_request'
         run: |
-          composer phpcbf -- --standard=PSR12 --ignore=vendor,cache .
+          ./vendor/bin/phpcbf --standard=PSR12 --ignore=vendor/*,cache/* .
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           git add .
@@ -67,9 +70,9 @@ jobs:
       
       - name: Run PHPCS Manual Check
         run: |
-          composer phpcs -- --standard=PSR12 --report=checkstyle --ignore=vendor,cache . | cs2pr
+          ./vendor/bin/phpcs --standard=PSR12 --report=checkstyle --ignore=vendor/*,cache/* . | cs2pr
         continue-on-error: true
       
       - name: Run PHPStan
         run: |
-          vendor/bin/phpstan analyse --configuration=phpstan.neon --error-format=github --no-progress .
+          ./vendor/bin/phpstan analyse --configuration=phpstan.neon --error-format=github --no-progress .
