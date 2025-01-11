@@ -65,14 +65,26 @@ function initializeDatabase(): void
         // Start output buffering for all database operations
         ob_start();
 
-        error_log('Registering model extensions...');
+        error_log('Setting up database and registering models...');
 
         // Setup RedBean with configured PDO instance first
         R::setup($pdo);
         R::debug(false);
         R::freeze(false); // Allow schema modifications
 
-        error_log('Registering model extensions...');
+        // Pre-register model types to ensure they exist
+        foreach (['equipment', 'checklist', 'inspection_lock', 'settings'] as $type) {
+            try {
+                // Create a test bean to register the type
+                $bean = R::dispense($type);
+                R::store($bean);
+                R::trash($bean);
+                error_log("Pre-registered model type: $type");
+            } catch (\Exception $e) {
+                error_log("Failed to pre-register model type $type: " . $e->getMessage());
+                throw $e;
+            }
+        }
 
         // Register model extensions
         R::ext('equipment', function ($bean) {
@@ -99,7 +111,7 @@ function initializeDatabase(): void
             return $model;
         });
 
-        error_log('Model extensions registered');
+        error_log('Model extensions registered successfully');
 
         // Initialize tables
         try {
