@@ -127,7 +127,7 @@ function initializeDatabase(): void
                 error_log("Step 2: Successfully dispensed bean for: $table");
 
                 // Verify bean structure
-                if (!$bean || !isset($bean->id)) {
+                if ($bean === null || !isset($bean->id)) {
                     throw new \Exception("Failed to create valid bean for: $table");
                 }
 
