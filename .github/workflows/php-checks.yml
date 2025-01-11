@@ -53,6 +53,13 @@ jobs:
         run: |
           composer validate --strict
           composer install --prefer-dist --no-progress
+          
+      - name: Set up vendor binaries
+        run: |
+          chmod +x ./vendor/bin/phpcbf
+          chmod +x ./vendor/bin/phpcs
+          chmod +x ./vendor/bin/phpstan
+          chmod +x ./vendor/bin/phpstan.phar
 
       - name: Verify PHPStan config
         run: test -f phpstan.neon || echo "PHPStan config not found"
