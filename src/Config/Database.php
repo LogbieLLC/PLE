@@ -173,7 +173,7 @@ function initializeDatabase(): void
                 // Store and verify with detailed status
                 error_log("Step 3: Attempting to store bean for: $table");
                 $id = R::store($bean);
-                if (!$id) {
+                if ($id === 0 || $id === null) {
                     throw new \Exception("Failed to store bean for: $table");
                 }
                 error_log("Step 4: Successfully stored bean with ID: $id for: $table");
@@ -181,7 +181,7 @@ function initializeDatabase(): void
                 // Verify table structure in database
                 error_log("Step 5: Verifying table structure for: $table");
                 $tableInfo = R::inspect($table);
-                if (!$tableInfo) {
+                if ($tableInfo === false || $tableInfo === null) {
                     throw new \Exception("Table verification failed for: $table");
                 }
                 error_log("Step 6: Table structure verified for: $table - " . json_encode($tableInfo));
@@ -193,7 +193,7 @@ function initializeDatabase(): void
             }
 
             // Initialize admin user if needed
-            if (!R::count('user')) {
+            if (R::count('user') === 0) {
                 error_log('Creating admin user...');
                 $admin = R::dispense('user');
                 $admin->username = 'admin';
@@ -204,7 +204,7 @@ function initializeDatabase(): void
             }
 
             // Final connection test
-            if (!R::testConnection()) {
+            if (R::testConnection() === false) {
                 throw new \Exception('Database connection test failed');
             }
             error_log('All tables initialized successfully');
