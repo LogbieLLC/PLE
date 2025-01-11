@@ -22,29 +22,48 @@ function initializeDatabase(): void
     error_reporting(E_ALL);
     ini_set('display_errors', '1');
 
-    // Ensure data directory exists with proper permissions
-    $dataDir = __DIR__ . '/../../data';
+    // Get database path from environment or use default
+    $dataDir = getenv('PLE_DATA_DIR') ?: __DIR__ . '/../../data';
+    $dbName = getenv('PLE_DB_NAME') ?: 'ple.db';
+    
+    error_log("Database configuration:");
+    error_log("- Data directory: $dataDir");
+    error_log("- Database name: $dbName");
+
+    // Ensure data directory exists
     if (!is_dir($dataDir)) {
-        if (!@mkdir($dataDir, 0777, true)) {
-            throw new \Exception("Failed to create data directory");
+        error_log("Creating data directory at: $dataDir");
+        if (!@mkdir($dataDir, 0775, true)) {
+            throw new \Exception("Failed to create data directory: $dataDir");
         }
-        chmod($dataDir, 0777);
+    } else {
+        error_log("Using existing data directory at: $dataDir");
     }
 
     // Database configuration
-    $dbfile = $dataDir . '/ple.db';
+    $dbfile = $dataDir . '/' . $dbName;
 
     try {
-        // Ensure database file exists and is writable
+        // Check database file status
         if (!file_exists($dbfile)) {
-            if (!@touch($dbfile)) {
-                throw new \Exception("Failed to create database file");
+            error_log("Database file does not exist at: $dbfile");
+            // Let RedBean handle file creation with proper permissions
+            $dirPath = dirname($dbfile);
+            if (!is_dir($dirPath)) {
+                if (!@mkdir($dirPath, 0775, true)) {
+                    throw new \Exception("Failed to create database directory: $dirPath");
+                }
             }
-            chmod($dbfile, 0666);
-        }
-
-        if (!is_writable($dbfile)) {
-            throw new \Exception("Database file is not writable");
+        } else {
+            error_log("Using existing database file at: $dbfile");
+            // Verify file is accessible
+            if (!is_readable($dbfile)) {
+                throw new \Exception("Database file is not readable: $dbfile");
+            }
+            if (!is_writable($dbfile)) {
+                throw new \Exception("Database file is not writable: $dbfile. Current permissions: " . 
+                    substr(sprintf('%o', fileperms($dbfile)), -4));
+            }
         }
 
         // Create PDO instance with logging disabled
